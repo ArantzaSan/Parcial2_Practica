@@ -1,42 +1,42 @@
 from collections import deque
 
-def general_uninformed_search(graph, start, goal, strategy='BFS'):
-    # Seleccionamos la estrategia de búsqueda
-    if strategy == 'BFS':
-        frontier = deque([(start, [start])])  # Usamos una cola para BFS
-    elif strategy == 'DFS':
-        frontier = [(start, [start])]  # Usamos una pila para DFS
+def esquema_general_busqueda(graph, start, goal, method='BFS'):
+    # Inicializar la estructura de datos de la frontera según el método
+    if method == 'BFS':
+        estructura_frontera = deque([(start, [start])])
+    elif method == 'DFS':
+        estructura_frontera = [(start, [start])]
     else:
-        raise ValueError("Estrategia no soportada. Usa 'BFS' o 'DFS'.")
+        raise ValueError("Método no reconocido. Debe ser 'BFS' o 'DFS'.")
 
-    # Conjunto para mantener el registro de los nodos visitados
-    visited = set()
+    # Conjunto para rastrear nodos ya explorados
+    nodos_explorados = set()
 
-    while frontier:
-        # Sacamos el nodo de la frontera según la estrategia
-        if strategy == 'BFS':
-            node, path = frontier.popleft()
-        elif strategy == 'DFS':
-            node, path = frontier.pop()
+    while estructura_frontera:
+        # Obtener el siguiente nodo y su camino según el método
+        if method == 'BFS':
+            nodo_actual, camino_actual = estructura_frontera.popleft()
+        elif method == 'DFS':
+            nodo_actual, camino_actual = estructura_frontera.pop()
 
-        # Si alcanzamos el nodo objetivo, devolvemos el camino
-        if node == goal:
-            return path
+        # Si el nodo actual es el objetivo, retornar el camino
+        if nodo_actual == goal:
+            return camino_actual
 
-        # Si el nodo no ha sido visitado
-        if node not in visited:
-            visited.add(node)
+        # Marcar el nodo actual como explorado
+        if nodo_actual not in nodos_explorados:
+            nodos_explorados.add(nodo_actual)
 
-            # Agregamos todos los vecinos no visitados a la frontera
-            for neighbor in graph[node]:
-                if neighbor not in visited:
-                    new_path = path + [neighbor]
-                    frontier.append((neighbor, new_path))
+            # Añadir vecinos no explorados a la frontera
+            for vecino in graph[nodo_actual]:
+                if vecino not in nodos_explorados:
+                    nuevo_camino = camino_actual + [vecino]
+                    estructura_frontera.append((vecino, nuevo_camino))
 
-    # Si no encontramos el nodo objetivo, devolvemos None
+    # Si la frontera se vacía sin encontrar el objetivo
     return None
 
-# Ejemplo de grafo representado como un diccionario de listas
+# Ejemplo de la estructura del grafo
 graph = {
     'A': ['B', 'C'],
     'B': ['A', 'D', 'E'],
@@ -46,10 +46,10 @@ graph = {
     'F': ['C', 'E']
 }
 
-# Ejecutamos la búsqueda no informada desde el nodo 'A' hasta el nodo 'F' usando BFS
-bfs_path = general_uninformed_search(graph, 'A', 'F', strategy='BFS')
-print(f"Camino desde 'A' hasta 'F' usando BFS: {bfs_path}")
+# Ejecutar la búsqueda usando BFS
+ruta_bfs = general_uninformed_search(graph, 'A', 'F', strategy='BFS')
+print(f"Ruta encontrada con BFS: {ruta_bfs}")
 
-# Ejecutamos la búsqueda no informada desde el nodo 'A' hasta el nodo 'F' usando DFS
-dfs_path = general_uninformed_search(graph, 'A', 'F', strategy='DFS')
-print(f"Camino desde 'A' hasta 'F' usando DFS: {dfs_path}")
+# Ejecutar la búsqueda usando DFS
+ruta_dfs = general_uninformed_search(graph, 'A', 'F', strategy='DFS')
+print(f"Ruta encontrada con DFS: {ruta_dfs}")
