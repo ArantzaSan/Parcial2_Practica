@@ -1,46 +1,56 @@
 import random
 
-def heuristic(state):
-    # Ejemplo de heurística: minimizar la suma de los elementos del estado
-    return sum(state)
+def evaluar_solucion(solucion):
+    # Función de evaluación: maximizar el producto de los elementos
+    producto = 1
+    for x in solucion:
+        producto *= x
+    return producto
 
-def get_neighbors(state):
-    # Genera vecinos modificando un elemento del estado
-    neighbors = []
-    for i in range(len(state)):
-        neighbor = state.copy()
-        neighbor[i] = neighbor[i] + random.choice([-1, 1])  # Modificación simple
-        neighbors.append(neighbor)
-    return neighbors
+def generar_variantes(solucion_actual):
+    # Genera variantes incrementando o decrementando aleatoriamente un elemento
+    variantes = []
+    for i in range(len(solucion_actual)):
+        variante_incremento = list(solucion_actual)
+        variante_incremento[i] += 1
+        variantes.append(variante_incremento)
 
-def local_beam_search(initial_state, beam_width=3, max_iterations=100):
-    # Inicializamos el haz con el estado inicial
-    beam = [initial_state]
-    best_state = initial_state
-    best_value = heuristic(initial_state)
+        variante_decremento = list(solucion_actual)
+        variante_decremento[i] -= 1
+        variantes.append(variante_decremento)
+    return variantes
 
-    for _ in range(max_iterations):
-        candidates = []
-        for state in beam:
-            neighbors = get_neighbors(state)
-            candidates.extend(neighbors)
+def busqueda_de_haz_localizada(estado_inicial, ancho_haz=4, max_iter=120):
+    # Inicializar el haz de soluciones
+    haz_actual = [list(estado_inicial)]
+    mejor_solucion_global = list(estado_inicial)
+    mejor_valor_global = evaluar_solucion(estado_inicial)
 
-        # Seleccionamos los mejores estados del haz
-        candidates.sort(key=heuristic)
-        beam = candidates[:beam_width]
+    for _ in range(max_iter):
+        candidatos = []
+        for estado in haz_actual:
+            vecinos = generar_variantes(estado)
+            candidatos.extend(vecinos)
 
-        # Actualizamos el mejor estado encontrado
-        for state in beam:
-            value = heuristic(state)
-            if value < best_value:
-                best_state = state
-                best_value = value
+        # Evaluar y seleccionar los mejores estados para el nuevo haz
+        candidatos.sort(key=evaluar_solucion, reverse=True)  # Maximizar el producto
+        haz_actual = candidatos[:ancho_haz]
 
-    return best_state, best_value
+        # Actualizar la mejor solución global encontrada
+        for estado in haz_actual:
+            valor_actual = evaluar_solucion(estado)
+            if valor_actual > mejor_valor_global:
+                mejor_solucion_global = list(estado)
+                mejor_valor_global = valor_actual
 
-# Ejemplo de estado inicial
-initial_state = [10, 5, 7, 3]
+        if not haz_actual:  # Si el haz se vacía
+            break
 
-# Ejecutamos la búsqueda de haz local
-final_state, final_value = local_beam_search(initial_state)
-print(f"Estado final: {final_state} con valor heurístico: {final_value}")
+    return mejor_solucion_global, mejor_valor_global
+
+# Estado inicial
+estado_inicial = [1, 2, 3, 4]
+
+# Ejecutar la búsqueda de haz local
+solucion_final, valor_final = busqueda_de_haz_localizada(estado_inicial)
+print(f"Solución final encontrada: {solucion_final} con valor de evaluación: {valor_final}")
