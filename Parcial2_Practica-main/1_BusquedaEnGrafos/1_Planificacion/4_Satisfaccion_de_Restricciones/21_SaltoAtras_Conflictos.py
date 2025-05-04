@@ -1,56 +1,49 @@
-def is_safe(board, row, col, n):
-    # Verificar la columna
-    for i in range(row):
-        if board[i][col] == 1:
-            return False
+def es_amenaza(tablero, fila, columna, tamano):
+    # Comprobar la columna hacia arriba
+    for i in range(fila):
+        if tablero[i][columna] == 1:
+            return True
 
-    # Verificar la diagonal superior izquierda
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
-            return False
+    # Comprobar la diagonal superior izquierda
+    for i, j in zip(range(fila, -1, -1), range(columna, -1, -1)):
+        if tablero[i][j] == 1:
+            return True
 
-    # Verificar la diagonal superior derecha
-    for i, j in zip(range(row, -1, -1), range(col, n)):
-        if board[i][j] == 1:
-            return False
-
-    return True
-
-def solve_n_queens_with_backjumping(board, row, n, conflicts):
-    if row >= n:
-        return True
-
-    for col in range(n):
-        if is_safe(board, row, col, n):
-            board[row][col] = 1
-            if solve_n_queens_with_backjumping(board, row + 1, n, conflicts):
-                return True
-            board[row][col] = 0
-            conflicts[row] = col
-
-    # Realizar backjumping
-    if row > 0:
-        conflict_column = conflicts[row - 1]
-        for r in range(row - 1, -1, -1):
-            if conflict_column in [board[r][c] for c in range(n) if board[r][c] == 1]:
-                conflicts[r] = conflict_column
-                return False
+    # Comprobar la diagonal superior derecha
+    for i, j in zip(range(fila, -1, -1), range(columna, tamano)):
+        if tablero[i][j] == 1:
+            return True
 
     return False
 
-def n_queens_with_backjumping(n):
-    board = [[0 for _ in range(n)] for _ in range(n)]
-    conflicts = [-1] * n
-    if not solve_n_queens_with_backjumping(board, 0, n, conflicts):
-        print("No existe solución.")
+def resolver_n_reinas_backtracking_inteligente(tablero, fila_actual, tamano, conflictos_previos):
+    if fila_actual >= tamano:
+        return True
+
+    for columna in range(tamano):
+        if not es_amenaza(tablero, fila_actual, columna, tamano):
+            tablero[fila_actual][columna] = 1
+            if resolver_n_reinas_backtracking_inteligente(tablero, fila_actual + 1, tamano, conflictos_previos):
+                return True
+            tablero[fila_actual][columna] = 0
+            conflictos_previos[fila_actual] = columna  # Registrar posible conflicto
+
+    # Backjumping implícito al no encontrar columna segura
+    return False
+
+def encontrar_solucion_n_reinas_backjumping(num_reinas):
+    tablero = [[0 for _ in range(num_reinas)] for _ in range(num_reinas)]
+    historial_conflictos = [-1] * num_reinas
+    if not resolver_n_reinas_backtracking_inteligente(tablero, 0, num_reinas, historial_conflictos):
+        print("No se encontró una disposición válida.")
         return None
-    return board
+    return tablero
 
 # Ejemplo de uso
-n = 4
-solution = n_queens_with_backjumping(n)
+num_reinas = 4
+solucion = encontrar_solucion_n_reinas_backjumping(num_reinas)
 
-if solution:
-    print(f"Solución para {n}-reinas con backjumping:")
-    for row in solution:
-        print(row)
+if solucion:
+    print(f"Disposición de {num_reinas} reinas con backjumping:")
+    for fila in solucion:
+        print(fila)
