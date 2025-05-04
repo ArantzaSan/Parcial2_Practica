@@ -1,31 +1,39 @@
-def dfs(graph, start, goal):
-    # Creamos una fila para mantener el orden de los nodos a visitar
-    stack = [(start, [start])]
-    # Creamos un conjunto para mantener el registro de los nodos visitados
-    visited = set()
+def buscar_en_profundidad(estructura_grafo, inicio_nodo, nodo_objetivo):
+    """
+    Realiza una búsqueda en profundidad (DFS) para encontrar un camino desde un
+    nodo de inicio hasta un nodo objetivo en un grafo.
 
-    while stack:
-        # Sacamos el nodo de la parte superior de la fila
-        (node, path) = stack.pop()
+    Args:
+        estructura_grafo (dict): Un diccionario que representa el grafo.
+                                   Las claves son los nodos y los valores son listas de vecinos.
+        inicio_nodo: El nodo desde donde comienza la búsqueda.
+        nodo_objetivo: El nodo que se desea encontrar.
 
-        # Si alcanzamos el nodo objetivo, devolvemos el camino
-        if node == goal:
-            return path
+    Returns:
+        list or None: Una lista que representa el camino encontrado desde el
+                     nodo de inicio hasta el nodo objetivo. Retorna None si no
+                     se encuentra ningún camino.
+    """
+    pila_exploracion = [(inicio_nodo, [inicio_nodo])]
+    nodos_visitados = set()
 
-        # Si el nodo no ha sido visitado
-        if node not in visited:
-            visited.add(node)
+    while pila_exploracion:
+        nodo_actual, ruta_actual = pila_exploracion.pop()
 
-            # Agregamos todos los vecinos no visitados a la pila
-            for neighbor in graph[node]:
-                if neighbor not in visited:
-                    stack.append((neighbor, path + [neighbor]))
+        if nodo_actual == nodo_objetivo:
+            return ruta_actual
 
-    # Si no encontramos el nodo objetivo, devolvemos None
+        if nodo_actual not in nodos_visitados:
+            nodos_visitados.add(nodo_actual)
+            conexiones = estructura_grafo.get(nodo_actual, [])
+            for vecino in conexiones:
+                if vecino not in nodos_visitados:
+                    pila_exploracion.append((vecino, ruta_actual + [vecino]))
+
     return None
 
-# Ejemplo de grafo representado como un diccionario de listas
-graph = {
+# Definición del grafo como un diccionario
+mi_red = {
     'A': ['B', 'C'],
     'B': ['A', 'D', 'E'],
     'C': ['A', 'F'],
@@ -34,6 +42,6 @@ graph = {
     'F': ['C', 'E']
 }
 
-# Ejecutamos la búsqueda en profundidad desde el nodo 'A' hasta el nodo 'F'
-path = dfs(graph, 'A', 'F')
-print(f"Camino desde 'A' hasta 'F': {path}")
+# Buscar un camino desde 'A' hasta 'F' usando DFS
+camino_encontrado = buscar_en_profundidad(mi_red, 'A', 'F')
+print(f"El camino encontrado desde 'A' hasta 'F' es: {camino_encontrado}")
