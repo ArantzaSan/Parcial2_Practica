@@ -1,51 +1,55 @@
 import random
 import math
 
-def heuristic(state):
-    # Ejemplo de heurística: minimizar la suma de los elementos del estado
-    return sum(state)
+def evaluar(solucion):
+    # Función de costo: maximizar la desviación estándar de la solución
+    n = len(solucion)
+    if n == 0:
+        return 0
+    promedio = sum(solucion) / n
+    desviacion_estandar = math.sqrt(sum((x - promedio) ** 2 for x in solucion) / n)
+    return desviacion_estandar
 
-def get_neighbor(state):
-    # Genera un vecino modificando un elemento del estado
-    neighbor = state.copy()
-    index = random.randint(0, len(state) - 1)
-    change = random.choice([-1, 1])
-    neighbor[index] += change
-    return neighbor
+def generar_sucesor(solucion_actual):
+    # Genera un sucesor intercambiando dos elementos aleatorios
+    sucesor = list(solucion_actual)
+    i, j = random.sample(range(len(sucesor)), 2)
+    sucesor[i], sucesor[j] = sucesor[j], sucesor[i]
+    return sucesor
 
-def acceptance_probability(old_cost, new_cost, temperature):
-    if new_cost < old_cost:
+def probabilidad_aceptacion(costo_viejo, costo_nuevo, temperatura):
+    if costo_nuevo > costo_viejo:
         return 1.0
     else:
-        return math.exp((old_cost - new_cost) / temperature)
+        return math.exp((costo_nuevo - costo_viejo) / temperatura)
 
-def simulated_annealing(initial_state, initial_temperature=1000, cooling_rate=0.003):
-    current_state = initial_state
-    current_cost = heuristic(current_state)
-    best_state = current_state
-    best_cost = current_cost
-    temperature = initial_temperature
+def recocido_simulado(estado_inicial, temp_inicial=5000, ratio_enfriamiento=0.001):
+    estado_actual = list(estado_inicial)
+    costo_actual = evaluar(estado_actual)
+    mejor_solucion = list(estado_actual)
+    mejor_costo = costo_actual
+    temperatura = temp_inicial
 
-    while temperature > 1:
-        new_state = get_neighbor(current_state)
-        new_cost = heuristic(new_state)
+    while temperatura > 0.1:
+        nuevo_estado = generar_sucesor(estado_actual)
+        nuevo_costo = evaluar(nuevo_estado)
 
-        if acceptance_probability(current_cost, new_cost, temperature) > random.random():
-            current_state = new_state
-            current_cost = new_cost
+        if probabilidad_aceptacion(costo_actual, nuevo_costo, temperatura) > random.random():
+            estado_actual = nuevo_estado
+            costo_actual = nuevo_costo
 
-            if new_cost < best_cost:
-                best_state = new_state
-                best_cost = new_cost
+            if costo_actual > mejor_costo:
+                mejor_solucion = list(estado_actual)
+                mejor_costo = costo_actual
 
-        # Enfriamiento
-        temperature *= 1 - cooling_rate
+        # Enfriar la temperatura
+        temperatura *= 1 - ratio_enfriamiento
 
-    return best_state, best_cost
+    return mejor_solucion, mejor_costo
 
-# Ejemplo de estado inicial
-initial_state = [10, 5, 7, 3]
+# Estado inicial
+estado_inicial = [10, 5, 7, 3]
 
-# Ejecutamos la búsqueda de templado simulado
-final_state, final_value = simulated_annealing(initial_state)
-print(f"Estado final: {final_state} con valor heurístico: {final_value}")
+# Ejecutar el algoritmo de recocido simulado
+solucion_final, valor_final = recocido_simulado(estado_inicial)
+print(f"Solución final: {solucion_final} con valor de evaluación: {valor_final}")
