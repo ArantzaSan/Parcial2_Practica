@@ -1,46 +1,46 @@
-def is_safe(board, row, col, n):
-    # Verificar la columna
-    for i in range(row):
-        if board[i][col] == 1:
+def es_posicion_valida(tablero, fila, columna, tamano):
+    # Comprobar la columna actual hacia arriba
+    for i in range(fila):
+        if tablero[i][columna] == 'Q':
             return False
 
-    # Verificar la diagonal superior izquierda
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
+    # Comprobar la diagonal superior izquierda
+    for i, j in zip(range(fila, -1, -1), range(columna, -1, -1)):
+        if tablero[i][j] == 'Q':
             return False
 
-    # Verificar la diagonal superior derecha
-    for i, j in zip(range(row, -1, -1), range(col, n)):
-        if board[i][j] == 1:
+    # Comprobar la diagonal superior derecha
+    for i, j in zip(range(fila, -1, -1), range(columna, tamano)):
+        if tablero[i][j] == 'Q':
             return False
 
     return True
 
-def solve_n_queens(board, row, n):
-    if row >= n:
+def resolver_n_reinas_recursivo(tablero, fila_actual, tamano):
+    if fila_actual >= tamano:
         return True
 
-    for col in range(n):
-        if is_safe(board, row, col, n):
-            board[row][col] = 1
-            if solve_n_queens(board, row + 1, n):
+    for columna in range(tamano):
+        if es_posicion_valida(tablero, fila_actual, columna, tamano):
+            tablero[fila_actual][columna] = 'Q'
+            if resolver_n_reinas_recursivo(tablero, fila_actual + 1, tamano):
                 return True
-            board[row][col] = 0
+            tablero[fila_actual][columna] = '.'  # Backtracking
 
     return False
 
-def n_queens(n):
-    board = [[0 for _ in range(n)] for _ in range(n)]
-    if not solve_n_queens(board, 0, n):
-        print("No existe solución.")
+def encontrar_solucion_n_reinas(num_reinas):
+    tablero = [['.' for _ in range(num_reinas)] for _ in range(num_reinas)]
+    if not resolver_n_reinas_recursivo(tablero, 0, num_reinas):
+        print("No se encontró una disposición válida.")
         return None
-    return board
+    return tablero
 
 # Ejemplo de uso
-n = 4
-solution = n_queens(n)
+num_reinas = 4
+solucion = encontrar_solucion_n_reinas(num_reinas)
 
-if solution:
-    print(f"Solución para {n}-reinas:")
-    for row in solution:
-        print(row)
+if solucion:
+    print(f"Disposición de {num_reinas} reinas:")
+    for fila in solucion:
+        print(' '.join(fila))
