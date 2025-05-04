@@ -1,90 +1,91 @@
 import numpy as np
 import random
 
-class VoltageControlMDP:
-    def __init__(self, states, actions, transition_probabilities, rewards, gamma=0.9):
-        self.states = states  # Estados posibles (niveles de voltaje)
-        self.actions = actions  # Acciones posibles (ajustes de voltaje)
-        self.transition_probabilities = transition_probabilities  # Probabilidades de transición
-        self.rewards = rewards  # Recompensas inmediatas por acción en cada estado
-        self.gamma = gamma  # Factor de descuento
-        self.value_function = {state: 0 for state in states}  # Función de valor inicial
-        self.policy = {state: random.choice(actions) for state in states}  # Política inicial aleatoria
+class ControlVoltajeMDP:
+    def __init__(self, estados, acciones, probabilidades_transicion, recompensas, factor_descuento=0.9):
+        self.estados = estados  # Estados posibles (niveles de voltaje)
+        self.acciones = acciones  # Acciones posibles (ajustes de voltaje)
+        self.probabilidades_transicion = probabilidades_transicion  # Probabilidades de transición
+        self.recompensas = recompensas  # Recompensas inmediatas por acción en cada estado
+        self.factor_descuento = factor_descuento  # Factor de descuento
+        self.funcion_valor = {estado: 0 for estado in estados}  # Función de valor inicial
+        self.politica = {estado: random.choice(acciones) for estado in estados}  # Política inicial aleatoria
 
-    def evaluate_policy(self):
+    def evaluar_politica(self):
         # Evaluar la política actual
         while True:
-            delta = 0
-            for state in self.states:
-                old_value = self.value_function[state]
-                action = self.policy[state]
-                new_value = self.rewards[state][action] + self.gamma * sum(
-                    self.transition_probabilities[state][action][next_state] * self.value_function[next_state]
-                    for next_state in self.states
+            variacion = 0
+            for estado in self.estados:
+                valor_anterior = self.funcion_valor[estado]
+                accion = self.politica[estado]
+                valor_actualizado = self.recompensas[estado][accion] + self.factor_descuento * sum(
+                    self.probabilidades_transicion[estado][accion][estado_siguiente] * self.funcion_valor[estado_siguiente]
+                    for estado_siguiente in self.estados
                 )
-                self.value_function[state] = new_value
-                delta = max(delta, abs(old_value - new_value))
-            if delta < 1e-3:
+                self.funcion_valor[estado] = valor_actualizado
+                variacion = max(variacion, abs(valor_anterior - valor_actualizado))
+            if variacion < 1e-3:
                 break
 
-    def improve_policy(self):
+    def mejorar_politica(self):
         # Mejorar la política basada en la función de valor actual
-        policy_stable = True
-        for state in self.states:
-            old_action = self.policy[state]
-            action_values = {}
-            for action in self.actions:
-                action_values[action] = self.rewards[state][action] + self.gamma * sum(
-                    self.transition_probabilities[state][action][next_state] * self.value_function[next_state]
-                    for next_state in self.states
+        politica_estable = True
+        for estado in self.estados:
+            accion_previa = self.politica[estado]
+            valores_acciones = {}
+            for accion in self.acciones:
+                valores_acciones[accion] = self.recompensas[estado][accion] + self.factor_descuento * sum(
+                    self.probabilidades_transicion[estado][accion][estado_siguiente] * self.funcion_valor[estado_siguiente]
+                    for estado_siguiente in self.estados
                 )
-            self.policy[state] = max(action_values, key=action_values.get)
-            if old_action != self.policy[state]:
-                policy_stable = False
-        return policy_stable
+            mejor_accion = max(valores_acciones, key=valores_acciones.get)
+            self.politica[estado] = mejor_accion
+            if accion_previa != self.politica[estado]:
+                politica_estable = False
+        return politica_estable
 
-    def policy_iteration(self):
+    def iteracion_politica(self):
         # Iteración de políticas
         while True:
-            self.evaluate_policy()
-            if self.improve_policy():
+            self.evaluar_politica()
+            if self.mejorar_politica():
                 break
 
 # Definir estados, acciones, recompensas y probabilidades de transición
-states = ['low', 'normal', 'high']  # Niveles de voltaje
-actions = ['decrease', 'maintain', 'increase']  # Ajustes de voltaje
+estados_voltaje = ['bajo', 'normal', 'alto']  # Niveles de voltaje
+ajustes_voltaje = ['disminuir', 'mantener', 'aumentar']  # Ajustes de voltaje
 
 # Recompensas inmediatas por acción en cada estado
-rewards = {
-    'low': {'decrease': -10, 'maintain': 0, 'increase': 5},
-    'normal': {'decrease': 0, 'maintain': 5, 'increase': 0},
-    'high': {'decrease': 5, 'maintain': 0, 'increase': -10}
+recompensas_inmediatas_voltaje = {
+    'bajo': {'disminuir': -10, 'mantener': 0, 'aumentar': 5},
+    'normal': {'disminuir': 0, 'mantener': 5, 'aumentar': 0},
+    'alto': {'disminuir': 5, 'mantener': 0, 'aumentar': -10}
 }
 
 # Probabilidades de transición de estado dada una acción
-transition_probabilities = {
-    'low': {
-        'decrease': {'low': 0.9, 'normal': 0.1, 'high': 0.0},
-        'maintain': {'low': 0.6, 'normal': 0.4, 'high': 0.0},
-        'increase': {'low': 0.2, 'normal': 0.7, 'high': 0.1}
+probabilidades_transicion_voltaje = {
+    'bajo': {
+        'disminuir': {'bajo': 0.9, 'normal': 0.1, 'alto': 0.0},
+        'mantener': {'bajo': 0.6, 'normal': 0.4, 'alto': 0.0},
+        'aumentar': {'bajo': 0.2, 'normal': 0.7, 'alto': 0.1}
     },
     'normal': {
-        'decrease': {'low': 0.3, 'normal': 0.6, 'high': 0.1},
-        'maintain': {'low': 0.1, 'normal': 0.8, 'high': 0.1},
-        'increase': {'low': 0.1, 'normal': 0.4, 'high': 0.5}
+        'disminuir': {'bajo': 0.3, 'normal': 0.6, 'alto': 0.1},
+        'mantener': {'bajo': 0.1, 'normal': 0.8, 'alto': 0.1},
+        'aumentar': {'bajo': 0.1, 'normal': 0.4, 'alto': 0.5}
     },
-    'high': {
-        'decrease': {'low': 0.1, 'normal': 0.7, 'high': 0.2},
-        'maintain': {'low': 0.0, 'normal': 0.4, 'high': 0.6},
-        'increase': {'low': 0.0, 'normal': 0.1, 'high': 0.9}
+    'alto': {
+        'disminuir': {'bajo': 0.1, 'normal': 0.7, 'alto': 0.2},
+        'mantener': {'bajo': 0.0, 'normal': 0.4, 'alto': 0.6},
+        'aumentar': {'bajo': 0.0, 'normal': 0.1, 'alto': 0.9}
     }
 }
 
 # Crear el controlador de voltaje y ejecutar la iteración de políticas
-voltage_control = VoltageControlMDP(states, actions, transition_probabilities, rewards)
-voltage_control.policy_iteration()
+controlador_voltaje = ControlVoltajeMDP(estados_voltaje, ajustes_voltaje, probabilidades_transicion_voltaje, recompensas_inmediatas_voltaje)
+controlador_voltaje.iteracion_politica()
 
 # Mostrar la política óptima
 print("Política óptima de control de voltaje:")
-for state, action in voltage_control.policy.items():
-    print(f"Si el voltaje es {state}, la acción óptima es {action}.")
+for estado, accion in controlador_voltaje.politica.items():
+    print(f"Si el voltaje es {estado}, la acción óptima es {accion}.")
