@@ -1,59 +1,60 @@
 from itertools import product
 
-def solve_cutset_conditioning(variables, domains, constraints, cutset):
-    # Generar todas las combinaciones posibles para el cutset
-    cutset_assignments = list(product(*[domains[var] for var in cutset]))
+def resolver_acondicionamiento_cutset(variables, dominios, restricciones, cutset):
+    # Generar todas las combinaciones posibles para las variables del cutset
+    asignaciones_cutset = list(product(*[dominios[var] for var in cutset]))
 
-    for assignment in cutset_assignments:
-        cutset_solution = dict(zip(cutset, assignment))
+    for asignacion in asignaciones_cutset:
+        solucion_cutset = dict(zip(cutset, asignacion))
 
-        # Verificar si la asignación del cutset es consistente con las restricciones
-        if all(constraint(cutset_solution) for constraint in constraints):
-            # Resolver el resto del problema con la asignación del cutset fija
-            remaining_solution = backtrack(variables, domains, constraints, cutset_solution)
-            if remaining_solution:
-                return {**cutset_solution, **remaining_solution}
-
-    return None
-
-def backtrack(variables, domains, constraints, assignment):
-    if len(assignment) == len(variables):
-        return assignment
-
-    unassigned = [var for var in variables if var not in assignment]
-    var = unassigned[0]
-
-    for value in domains[var]:
-        new_assignment = {**assignment, var: value}
-        if all(constraint(new_assignment) for constraint in constraints):
-            result = backtrack(variables, domains, constraints, new_assignment)
-            if result:
-                return result
+        # Verificar si la asignación del cutset satisface todas las restricciones
+        if all(restriccion(solucion_cutset) for restriccion in restricciones):
+            # Intentar resolver el resto del problema con el cutset ya asignado
+            solucion_restante = busqueda_con_retroceso(variables, dominios, restricciones, solucion_cutset)
+            if solucion_restante:
+                return {**solucion_cutset, **solucion_restante}
 
     return None
 
-# Definir variables, dominios y restricciones para el sistema de ventas de automóviles
-variables = ['auto1', 'auto2', 'auto3']
-domains = {
-    'auto1': ['rojo', 'azul'],
-    'auto2': ['azul', 'verde'],
-    'auto3': ['rojo', 'verde']
+def busqueda_con_retroceso(variables, dominios, restricciones, asignacion_actual):
+    if len(asignacion_actual) == len(variables):
+        return asignacion_actual
+
+    variables_sin_asignar = [var for var in variables if var not in asignacion_actual]
+    variable_actual = variables_sin_asignar[0]
+
+    for valor in dominios[variable_actual]:
+        nueva_asignacion = {**asignacion_actual, variable_actual: valor}
+        if all(restriccion(nueva_asignacion) for restriccion in restricciones):
+            resultado = busqueda_con_retroceso(variables, dominios, restricciones, nueva_asignacion)
+            if resultado:
+                return resultado
+
+    return None
+
+# Definir variables, dominios y restricciones para la planificación de tareas
+tareas = ['TareaA', 'TareaB', 'TareaC']
+duraciones = {
+    'TareaA': [1, 2],
+    'TareaB': [2, 3],
+    'TareaC': [1, 2]
 }
 
-# Restricciones: no dos autos adyacentes pueden tener el mismo color
-def constraint(assignment):
-    values = list(assignment.values())
-    return len(values) == len(set(values))
+# Restricción: la suma de las duraciones de las tareas debe ser menor o igual a 5
+def restriccion_duracion_total(asignacion):
+    if len(asignacion) == len(tareas):
+        return sum(asignacion.values()) <= 5
+    return True
 
-constraints = [constraint]
+condiciones = [restriccion_duracion_total]
 
-# Definir el cutset
-cutset = ['auto1']
+# Definir el cutset (una tarea para condicionar)
+cutset_tareas = ['TareaA']
 
-# Resolver el problema utilizando acondicionamiento de corte
-solution = solve_cutset_conditioning(variables, domains, constraints, cutset)
+# Resolver el problema de planificación de tareas utilizando acondicionamiento de corte
+solucion_planificacion = resolver_acondicionamiento_cutset(tareas, duraciones, condiciones, cutset_tareas)
 
-if solution:
-    print(f"Solución encontrada: {solution}")
+if solucion_planificacion:
+    print(f"Solución de planificación encontrada: {solucion_planificacion}")
 else:
-    print("No se encontró solución.")
+    print("No se encontró solución de planificación.")
