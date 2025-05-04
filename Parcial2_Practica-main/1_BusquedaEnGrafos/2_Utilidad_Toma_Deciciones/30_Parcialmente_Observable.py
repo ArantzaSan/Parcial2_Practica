@@ -1,90 +1,90 @@
 import random
 
-class AstronomyPOMDP:
-    def __init__(self, states, actions, observations, transition_probabilities, observation_probabilities, rewards, gamma=0.9):
-        self.states = states  # Estados posibles (condiciones del cielo)
-        self.actions = actions  # Acciones posibles (observar estrella o galaxia)
-        self.observations = observations  # Observaciones posibles (clima aparente)
-        self.transition_probabilities = transition_probabilities  # Probabilidades de transición
-        self.observation_probabilities = observation_probabilities  # Probabilidades de observación
-        self.rewards = rewards  # Recompensas inmediatas por acción en cada estado
-        self.gamma = gamma  # Factor de descuento
-        self.belief_state = {state: 1/len(states) for state in states}  # Estado de creencia inicial uniforme
+class AstronomiaPOMDP:
+    def __init__(self, estados, acciones, observaciones, probabilidades_transicion, probabilidades_observacion, recompensas, factor_descuento=0.9):
+        self.estados = estados  # Estados posibles (condiciones del cielo)
+        self.acciones = acciones  # Acciones posibles (observar estrella o galaxia)
+        self.observaciones = observaciones  # Observaciones posibles (clima aparente)
+        self.probabilidades_transicion = probabilidades_transicion  # Probabilidades de transición
+        self.probabilidades_observacion = probabilidades_observacion  # Probabilidades de observación
+        self.recompensas = recompensas  # Recompensas inmediatas por acción en cada estado
+        self.factor_descuento = factor_descuento  # Factor de descuento
+        self.estado_creencia = {estado: 1/len(estados) for estado in estados}  # Estado de creencia inicial uniforme
 
-    def update_belief_state(self, action, observation):
+    def actualizar_estado_creencia(self, accion, observacion):
         # Actualizar el estado de creencia basado en la acción y la observación
-        new_belief = {}
-        for next_state in self.states:
-            prob = 0
-            for state in self.states:
-                transition_prob = self.transition_probabilities[state][action][next_state]
-                observation_prob = self.observation_probabilities[next_state][observation]
-                prob += self.belief_state[state] * transition_prob * observation_prob
-            new_belief[next_state] = prob
+        nuevo_creencia = {}
+        for siguiente_estado in self.estados:
+            probabilidad = 0
+            for estado in self.estados:
+                prob_transicion = self.probabilidades_transicion[estado][accion][siguiente_estado]
+                prob_observacion = self.probabilidades_observacion[siguiente_estado][observacion]
+                probabilidad += self.estado_creencia[estado] * prob_transicion * prob_observacion
+            nuevo_creencia[siguiente_estado] = probabilidad
 
         # Normalizar el estado de creencia
-        total = sum(new_belief.values())
-        self.belief_state = {state: prob / total for state, prob in new_belief.items()}
+        total = sum(nuevo_creencia.values())
+        self.estado_creencia = {estado: prob / total for estado, prob in nuevo_creencia.items()}
 
-    def choose_action(self):
+    def elegir_accion(self):
         # Elegir la mejor acción basada en el estado de creencia actual
-        action_values = {}
-        for action in self.actions:
-            value = sum(
-                self.belief_state[state] * (self.rewards[state][action] + self.gamma * max(
-                    sum(self.transition_probabilities[state][action][next_state] * self.belief_state[next_state]
-                        for next_state in self.states),
+        valores_acciones = {}
+        for accion in self.acciones:
+            valor = sum(
+                self.estado_creencia[estado] * (self.recompensas[estado][accion] + self.factor_descuento * max(
+                    sum(self.probabilidades_transicion[estado][accion][siguiente_estado] * self.estado_creencia[siguiente_estado]
+                        for siguiente_estado in self.estados),
                     0
                 ))
-                for state in self.states
+                for estado in self.estados
             )
-            action_values[action] = value
-        return max(action_values, key=action_values.get)
+            valores_acciones[accion] = valor
+        return max(valores_acciones, key=valores_acciones.get)
 
-    def simulate(self, steps=5):
+    def simular(self, pasos=5):
         # Simular la toma de decisiones durante un número de pasos
-        for _ in range(steps):
-            action = self.choose_action()
-            observation = random.choice(self.observations)  # Simular una observación
-            print(f"Acción elegida: {action}, Observación: {observation}")
-            self.update_belief_state(action, observation)
-            print(f"Estado de creencia actual: {self.belief_state}")
+        for _ in range(pasos):
+            accion = self.elegir_accion()
+            observacion = random.choice(self.observaciones)  # Simular una observación
+            print(f"Acción elegida: {accion}, Observación: {observacion}")
+            self.actualizar_estado_creencia(accion, observacion)
+            print(f"Estado de creencia actual: {self.estado_creencia}")
 
 # Definir estados, acciones, observaciones, recompensas y probabilidades
-states = ['clear', 'cloudy', 'rainy']  # Condiciones del cielo
-actions = ['observe_star', 'observe_galaxy']  # Acciones posibles
-observations = ['clear_sky', 'cloudy_sky', 'rainy_sky']  # Observaciones posibles
+estados_cielo = ['claro', 'nublado', 'lluvioso']  # Condiciones del cielo
+acciones_observacion = ['observar_estrella', 'observar_galaxia']  # Acciones posibles
+observaciones_clima = ['cielo_claro', 'cielo_nublado', 'cielo_lluvioso']  # Observaciones posibles
 
 # Recompensas inmediatas por acción en cada estado
-rewards = {
-    'clear': {'observe_star': 10, 'observe_galaxy': 8},
-    'cloudy': {'observe_star': 5, 'observe_galaxy': 4},
-    'rainy': {'observe_star': 1, 'observe_galaxy': 2}
+recompensas_observacion_astronomica = {
+    'claro': {'observar_estrella': 10, 'observar_galaxia': 8},
+    'nublado': {'observar_estrella': 5, 'observar_galaxia': 4},
+    'lluvioso': {'observar_estrella': 1, 'observar_galaxia': 2}
 }
 
 # Probabilidades de transición de estado dada una acción
-transition_probabilities = {
-    'clear': {
-        'observe_star': {'clear': 0.7, 'cloudy': 0.2, 'rainy': 0.1},
-        'observe_galaxy': {'clear': 0.6, 'cloudy': 0.3, 'rainy': 0.1}
+probabilidades_transicion_clima = {
+    'claro': {
+        'observar_estrella': {'claro': 0.7, 'nublado': 0.2, 'lluvioso': 0.1},
+        'observar_galaxia': {'claro': 0.6, 'nublado': 0.3, 'lluvioso': 0.1}
     },
-    'cloudy': {
-        'observe_star': {'clear': 0.3, 'cloudy': 0.5, 'rainy': 0.2},
-        'observe_galaxy': {'clear': 0.2, 'cloudy': 0.6, 'rainy': 0.2}
+    'nublado': {
+        'observar_estrella': {'claro': 0.3, 'nublado': 0.5, 'lluvioso': 0.2},
+        'observar_galaxia': {'claro': 0.2, 'nublado': 0.6, 'lluvioso': 0.2}
     },
-    'rainy': {
-        'observe_star': {'clear': 0.1, 'cloudy': 0.3, 'rainy': 0.6},
-        'observe_galaxy': {'clear': 0.1, 'cloudy': 0.2, 'rainy': 0.7}
+    'lluvioso': {
+        'observar_estrella': {'claro': 0.1, 'nublado': 0.3, 'lluvioso': 0.6},
+        'observar_galaxia': {'claro': 0.1, 'nublado': 0.2, 'lluvioso': 0.7}
     }
 }
 
 # Probabilidades de observación dado un estado
-observation_probabilities = {
-    'clear': {'clear_sky': 0.8, 'cloudy_sky': 0.15, 'rainy_sky': 0.05},
-    'cloudy': {'clear_sky': 0.2, 'cloudy_sky': 0.7, 'rainy_sky': 0.1},
-    'rainy': {'clear_sky': 0.05, 'cloudy_sky': 0.25, 'rainy_sky': 0.7}
+probabilidades_observacion_clima = {
+    'claro': {'cielo_claro': 0.8, 'cielo_nublado': 0.15, 'cielo_lluvioso': 0.05},
+    'nublado': {'cielo_claro': 0.2, 'cielo_nublado': 0.7, 'cielo_lluvioso': 0.1},
+    'lluvioso': {'cielo_claro': 0.05, 'cielo_nublado': 0.25, 'cielo_lluvioso': 0.7}
 }
 
 # Crear el POMDP de astronomía y simular la toma de decisiones
-astronomy_pomdp = AstronomyPOMDP(states, actions, observations, transition_probabilities, observation_probabilities, rewards)
-astronomy_pomdp.simulate(steps=5)
+pomdp_astronomia = AstronomiaPOMDP(estados_cielo, acciones_observacion, observaciones_clima, probabilidades_transicion_clima, probabilidades_observacion_clima, recompensas_observacion_astronomica)
+pomdp_astronomia.simular(pasos=5)
