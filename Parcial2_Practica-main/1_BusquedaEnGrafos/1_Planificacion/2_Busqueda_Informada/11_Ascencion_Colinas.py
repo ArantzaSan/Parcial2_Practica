@@ -1,40 +1,53 @@
 import random
 
-def heuristic(state):
-    # Ejemplo de heurística: minimizar la suma de los elementos del estado
-    return sum(state)
+def funcion_evaluacion(estado):
+    # Heurística alternativa: varianza de los elementos del estado (minimizarla)
+    n = len(estado)
+    if n == 0:
+        return 0
+    promedio = sum(estado) / n
+    varianza = sum((x - promedio) ** 2 for x in estado) / n
+    return varianza
 
-def get_neighbors(state):
-    # Genera vecinos modificando un elemento del estado
-    neighbors = []
-    for i in range(len(state)):
-        neighbor = state.copy()
-        neighbor[i] = neighbor[i] + random.choice([-1, 1])  # Modificación simple
-        neighbors.append(neighbor)
-    return neighbors
+def generar_vecindario(estado_actual):
+    # Crea vecinos intercambiando pares de elementos del estado
+    vecinos = []
+    n = len(estado_actual)
+    for i in range(n):
+        for j in range(i + 1, n):
+            vecino = list(estado_actual)
+            vecino[i], vecino[j] = vecino[j], vecino[i]
+            vecinos.append(vecino)
+    return vecinos
 
-def hill_climbing(initial_state, max_iterations=1000):
-    current_state = initial_state
-    current_value = heuristic(current_state)
+def escalada_de_colinas(estado_inicial, max_iteraciones=1000):
+    estado_actual = list(estado_inicial)
+    valor_actual = funcion_evaluacion(estado_actual)
 
-    for _ in range(max_iterations):
-        neighbors = get_neighbors(current_state)
-        next_state = min(neighbors, key=heuristic)
-        next_value = heuristic(next_state)
+    for _ in range(max_iteraciones):
+        vecinos = generar_vecindario(estado_actual)
+        mejor_vecino = None
+        mejor_valor = valor_actual
 
-        # Si encontramos un vecino mejor, nos movemos a ese estado
-        if next_value < current_value:
-            current_state = next_state
-            current_value = next_value
+        for vecino in vecinos:
+            valor_vecino = funcion_evaluacion(vecino)
+            if valor_vecino < mejor_valor:
+                mejor_valor = valor_vecino
+                mejor_vecino = vecino
+
+        # Moverse al mejor vecino si hay una mejora
+        if mejor_vecino:
+            estado_actual = mejor_vecino
+            valor_actual = mejor_valor
         else:
-            # Si no hay mejora, terminamos la búsqueda
+            # Detener si no hay mejora en el vecindario
             break
 
-    return current_state, current_value
+    return estado_actual, valor_actual
 
-# Ejemplo de estado inicial
-initial_state = [10, 5, 7, 3]
+# Estado inicial de ejemplo
+estado_inicial = [10, 5, 7, 3]
 
-# Ejecutamos la búsqueda de ascensión de colinas
-final_state, final_value = hill_climbing(initial_state)
-print(f"Estado final: {final_state} con valor heurístico: {final_value}")
+# Ejecutar el algoritmo de escalada de colinas
+estado_final, valor_final = escalada_de_colinas(estado_inicial)
+print(f"Estado resultante: {estado_final} con valor de evaluación: {valor_final}")
