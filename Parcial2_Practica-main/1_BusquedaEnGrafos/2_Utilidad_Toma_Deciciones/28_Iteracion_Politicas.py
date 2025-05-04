@@ -1,87 +1,88 @@
-class CompanyManagement:
-    def __init__(self, states, actions, rewards, transition_probabilities, gamma=0.9):
-        self.states = states  # Estados posibles (niveles de ingresos)
-        self.actions = actions  # Acciones posibles (niveles de inversión en marketing)
-        self.rewards = rewards  # Recompensas inmediatas por acción en cada estado
-        self.transition_probabilities = transition_probabilities  # Probabilidades de transición
-        self.gamma = gamma  # Factor de descuento
-        self.policy = {state: actions[0] for state in states}  # Política inicial
-        self.value_function = {state: 0 for state in states}  # Función de valor inicial
+class GestionEmpresa:
+    def __init__(self, estados, acciones, recompensas, probabilidades_transicion, factor_descuento=0.9):
+        self.estados = estados  # Estados posibles (niveles de ingresos)
+        self.acciones = acciones  # Acciones posibles (niveles de inversión en marketing)
+        self.recompensas = recompensas  # Recompensas inmediatas por acción en cada estado
+        self.probabilidades_transicion = probabilidades_transicion  # Probabilidades de transición
+        self.factor_descuento = factor_descuento  # Factor de descuento
+        self.politica = {estado: acciones[0] for estado in estados}  # Política inicial
+        self.funcion_valor = {estado: 0 for estado in estados}  # Función de valor inicial
 
-    def evaluate_policy(self):
+    def evaluar_politica(self):
         # Evaluar la política actual
         while True:
             delta = 0
-            for state in self.states:
-                old_value = self.value_function[state]
-                action = self.policy[state]
-                new_value = self.rewards[state][action] + self.gamma * sum(
-                    self.transition_probabilities[state][action][next_state] * self.value_function[next_state]
-                    for next_state in self.states
+            for estado in self.estados:
+                valor_antiguo = self.funcion_valor[estado]
+                accion = self.politica[estado]
+                nuevo_valor = self.recompensas[estado][accion] + self.factor_descuento * sum(
+                    self.probabilidades_transicion[estado][accion][estado_siguiente] * self.funcion_valor[estado_siguiente]
+                    for estado_siguiente in self.estados
                 )
-                self.value_function[state] = new_value
-                delta = max(delta, abs(old_value - new_value))
+                self.funcion_valor[estado] = nuevo_valor
+                delta = max(delta, abs(valor_antiguo - nuevo_valor))
             if delta < 1e-3:
                 break
 
-    def improve_policy(self):
+    def mejorar_politica(self):
         # Mejorar la política basada en la función de valor actual
-        policy_stable = True
-        for state in self.states:
-            old_action = self.policy[state]
-            action_values = {}
-            for action in self.actions:
-                action_values[action] = self.rewards[state][action] + self.gamma * sum(
-                    self.transition_probabilities[state][action][next_state] * self.value_function[next_state]
-                    for next_state in self.states
+        politica_estable = True
+        for estado in self.estados:
+            accion_antigua = self.politica[estado]
+            valores_accion = {}
+            for accion in self.acciones:
+                valores_accion[accion] = self.recompensas[estado][accion] + self.factor_descuento * sum(
+                    self.probabilidades_transicion[estado][accion][estado_siguiente] * self.funcion_valor[estado_siguiente]
+                    for estado_siguiente in self.estados
                 )
-            self.policy[state] = max(action_values, key=action_values.get)
-            if old_action != self.policy[state]:
-                policy_stable = False
-        return policy_stable
+            mejor_accion = max(valores_accion, key=valores_accion.get)
+            self.politica[estado] = mejor_accion
+            if accion_antigua != self.politica[estado]:
+                politica_estable = False
+        return politica_estable
 
-    def policy_iteration(self):
+    def iteracion_politica(self):
         # Iteración de políticas
         while True:
-            self.evaluate_policy()
-            if self.improve_policy():
+            self.evaluar_politica()
+            if self.mejorar_politica():
                 break
 
 # Definir estados, acciones, recompensas y probabilidades de transición
-states = ['low', 'medium', 'high']  # Niveles de ingresos
-actions = ['invest_low', 'invest_medium', 'invest_high']  # Niveles de inversión en marketing
+estados_empresa = ['bajo', 'medio', 'alto']  # Niveles de ingresos
+acciones_marketing = ['invertir_poco', 'invertir_medio', 'invertir_mucho']  # Niveles de inversión en marketing
 
 # Recompensas inmediatas por acción en cada estado
-rewards = {
-    'low': {'invest_low': 10, 'invest_medium': 20, 'invest_high': 25},
-    'medium': {'invest_low': 30, 'invest_medium': 40, 'invest_high': 45},
-    'high': {'invest_low': 50, 'invest_medium': 55, 'invest_high': 60}
+recompensas_empresa = {
+    'bajo': {'invertir_poco': 10, 'invertir_medio': 20, 'invertir_mucho': 25},
+    'medio': {'invertir_poco': 30, 'invertir_medio': 40, 'invertir_mucho': 45},
+    'alto': {'invertir_poco': 50, 'invertir_medio': 55, 'invertir_mucho': 60}
 }
 
 # Probabilidades de transición de estado dada una acción
-transition_probabilities = {
-    'low': {
-        'invest_low': {'low': 0.7, 'medium': 0.2, 'high': 0.1},
-        'invest_medium': {'low': 0.5, 'medium': 0.3, 'high': 0.2},
-        'invest_high': {'low': 0.4, 'medium': 0.3, 'high': 0.3}
+probabilidades_transicion_empresa = {
+    'bajo': {
+        'invertir_poco': {'bajo': 0.7, 'medio': 0.2, 'alto': 0.1},
+        'invertir_medio': {'bajo': 0.5, 'medio': 0.3, 'alto': 0.2},
+        'invertir_mucho': {'bajo': 0.4, 'medio': 0.3, 'alto': 0.3}
     },
-    'medium': {
-        'invest_low': {'low': 0.3, 'medium': 0.4, 'high': 0.3},
-        'invest_medium': {'low': 0.2, 'medium': 0.5, 'high': 0.3},
-        'invest_high': {'low': 0.2, 'medium': 0.3, 'high': 0.5}
+    'medio': {
+        'invertir_poco': {'bajo': 0.3, 'medio': 0.4, 'alto': 0.3},
+        'invertir_medio': {'bajo': 0.2, 'medio': 0.5, 'alto': 0.3},
+        'invertir_mucho': {'bajo': 0.2, 'medio': 0.3, 'alto': 0.5}
     },
-    'high': {
-        'invest_low': {'low': 0.2, 'medium': 0.3, 'high': 0.5},
-        'invest_medium': {'low': 0.1, 'medium': 0.3, 'high': 0.6},
-        'invest_high': {'low': 0.1, 'medium': 0.2, 'high': 0.7}
+    'alto': {
+        'invertir_poco': {'bajo': 0.2, 'medio': 0.3, 'alto': 0.5},
+        'invertir_medio': {'bajo': 0.1, 'medio': 0.3, 'alto': 0.6},
+        'invertir_mucho': {'bajo': 0.1, 'medio': 0.2, 'alto': 0.7}
     }
 }
 
 # Crear el administrador de la empresa y ejecutar la iteración de políticas
-company = CompanyManagement(states, actions, rewards, transition_probabilities)
-company.policy_iteration()
+administrador_empresa = GestionEmpresa(estados_empresa, acciones_marketing, recompensas_empresa, probabilidades_transicion_empresa)
+administrador_empresa.iteracion_politica()
 
 # Mostrar la política óptima
-print("Política óptima de inversión en marketing:")
-for state, action in company.policy.items():
-    print(f"Si los ingresos son {state}, la inversión óptima es {action}.")
+print("Política óptima de inversión en marketing para la empresa:")
+for estado, accion in administrador_empresa.politica.items():
+    print(f"Si los ingresos son {estado}, la inversión óptima en marketing es {accion}.")
