@@ -1,35 +1,38 @@
 import heapq
 
 def heuristic(node, goal):
-    # Ejemplo de heurística: 
-    return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
+    # Heurística: distancia Manhattan multiplicada por un factor
+    return (abs(node[0] - goal[0]) + abs(node[1] - goal[1])) * 1.5
 
 def a_star_search(graph, start, goal):
-    # Cola de prioridad para mantener los nodos a explorar
-    priority_queue = []
-    heapq.heappush(priority_queue, (0, start, [start]))
+    # Estructura de datos para la frontera: (f_score, nodo, camino)
+    open_set = [(0, start, [start])]
+    # Diccionario para almacenar el costo g(n) conocido hasta cada nodo
+    g_score = {start: 0}
+    # Diccionario para recordar el nodo padre de cada nodo en el camino óptimo
+    came_from = {}
 
-    # Diccionario para mantener el registro de los costos acumulados
-    costs = {start: 0}
+    while open_set:
+        # Obtener el nodo con el menor f_score de la frontera
+        f_score, current, path = heapq.heappop(open_set)
 
-    while priority_queue:
-        # Sacamos el nodo con el menor costo estimado
-        (current_cost, node, path) = heapq.heappop(priority_queue)
-
-        # Si alcanzamos el nodo objetivo, devolvemos el camino
-        if node == goal:
+        # Si el nodo actual es el objetivo, reconstruir y retornar el camino
+        if current == goal:
             return path
 
-        # Exploramos los vecinos del nodo actual
-        for neighbor, cost in graph[node]:
-            new_cost = costs[node] + cost
-            if neighbor not in costs or new_cost < costs[neighbor]:
-                costs[neighbor] = new_cost
-                priority = new_cost + heuristic(neighbor, goal)
-                new_path = path + [neighbor]
-                heapq.heappush(priority_queue, (priority, neighbor, new_path))
+        # Explorar los vecinos del nodo actual
+        for neighbor, cost in graph[current]:
+            tentative_g_score = g_score[current] + cost
 
-    # Si no encontramos el nodo objetivo, devolvemos None
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                # Se descubre un mejor camino hacia el vecino
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                h_score = heuristic(neighbor, goal)
+                f_score_neighbor = tentative_g_score + h_score
+                heapq.heappush(open_set, (f_score_neighbor, neighbor, path + [neighbor]))
+
+    # Si la frontera se vacía sin encontrar el objetivo
     return None
 
 # Ejemplo de grafo representado como un diccionario de listas de tuplas (nodo, costo)
