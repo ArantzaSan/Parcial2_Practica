@@ -1,61 +1,63 @@
 import random
 
-def heuristic(state):
-    # Ejemplo de heurística: minimizar la suma de los elementos del estado
-    return sum(state)
+def calcular_fitness(individuo):
+    # Función de fitness: penalizar la distancia desde un vector objetivo
+    vector_objetivo = [0] * len(individuo)
+    return -sum(abs(individuo[i] - vector_objetivo[i]) for i in range(len(individuo)))
 
-def initialize_population(pop_size, state_length):
-    # Inicializa una población de estados aleatorios
+def crear_poblacion_inicial(tamano_poblacion, longitud_estado):
+    # Genera una población inicial de individuos aleatorios
     return [
-        [random.randint(0, 10) for _ in range(state_length)]
-        for _ in range(pop_size)
+        [random.randint(-5, 5) for _ in range(longitud_estado)]
+        for _ in range(tamano_poblacion)
     ]
 
-def selection(population):
-    # Selecciona individuos basándose en la heurística (menor valor es mejor)
-    sorted_population = sorted(population, key=heuristic)
-    return sorted_population[:len(population) // 2]
+def torneo_seleccion(poblacion, tamano_torneo=3):
+    # Selecciona un individuo mediante torneo
+    participantes = random.sample(poblacion, tamano_torneo)
+    return max(participantes, key=calcular_fitness)
 
-def crossover(parent1, parent2):
-    # Realiza un cruce de un punto entre dos padres
-    point = random.randint(1, len(parent1) - 1)
-    child1 = parent1[:point] + parent2[point:]
-    child2 = parent2[:point] + parent1[point:]
-    return child1, child2
+def recombinacion(padre1, padre2):
+    # Realiza una recombinación uniforme entre dos padres
+    hijo1 = []
+    hijo2 = []
+    for i in range(len(padre1)):
+        if random.random() < 0.5:
+            hijo1.append(padre1[i])
+            hijo2.append(padre2[i])
+        else:
+            hijo1.append(padre2[i])
+            hijo2.append(padre1[i])
+    return hijo1, hijo2
 
-def mutate(state, mutation_rate=0.1):
-    # Realiza una mutación en el estado
-    for i in range(len(state)):
-        if random.random() < mutation_rate:
-            state[i] = state[i] + random.choice([-1, 1])
-    return state
+def mutacion(individuo, tasa_mutacion=0.05):
+    # Aplica mutación a un individuo
+    for i in range(len(individuo)):
+        if random.random() < tasa_mutacion:
+            individuo[i] += random.randint(-2, 2)
+    return individuo
 
-def genetic_algorithm(pop_size=10, generations=50, state_length=4):
-    # Inicializa la población
-    population = initialize_population(pop_size, state_length)
+def algoritmo_genetico_evolutivo(tamano_poblacion=15, num_generaciones=75, longitud_estado=4):
+    # Inicializar la población
+    poblacion = crear_poblacion_inicial(tamano_poblacion, longitud_estado)
 
-    for _ in range(generations):
-        # Selección
-        selected = selection(population)
-
-        # Crear la siguiente generación
-        next_generation = []
-        while len(next_generation) < pop_size:
-            # Seleccionar padres
-            parents = random.sample(selected, 2)
-            # Cruce
-            child1, child2 = crossover(parents[0], parents[1])
+    for generacion in range(num_generaciones):
+        nueva_poblacion = []
+        for _ in range(tamano_poblacion // 2):
+            # Selección de padres mediante torneo
+            madre = torneo_seleccion(poblacion)
+            padre = torneo_seleccion(poblacion)
+            # Recombinación
+            descendiente1, descendiente2 = recombinacion(madre, padre)
             # Mutación
-            next_generation.append(mutate(child1))
-            next_generation.append(mutate(child2))
-
-        # Actualizar la población
-        population = next_generation
+            nueva_poblacion.append(mutacion(descendiente1))
+            nueva_poblacion.append(mutacion(descendiente2))
+        poblacion = nueva_poblacion
 
     # Devolver el mejor individuo de la última generación
-    best_state = min(population, key=heuristic)
-    return best_state, heuristic(best_state)
+    mejor_individuo = max(poblacion, key=calcular_fitness)
+    return mejor_individuo, calcular_fitness(mejor_individuo)
 
-# Ejecutamos el algoritmo genético
-final_state, final_value = genetic_algorithm()
-print(f"Estado final: {final_state} con valor heurístico: {final_value}")
+# Ejecutar el algoritmo genético evolutivo
+solucion_final, valor_final = algoritmo_genetico_evolutivo()
+print(f"Solución final: {solucion_final} con valor de fitness: {valor_final}")
