@@ -1,60 +1,67 @@
 import random
 
-def count_conflicts(board, row, col, n):
-    conflicts = 0
-    # Verificar la columna
-    for i in range(n):
-        if i != row and board[i][col] == 1:
-            conflicts += 1
+def contar_amenazas(tablero, fila, columna, tamano):
+    amenazas = 0
+    # Revisar columna
+    for i in range(tamano):
+        if i != fila and tablero[i][columna] == 1:
+            amenazas += 1
 
-    # Verificar la diagonal superior izquierda
-    i, j = row - 1, col - 1
+    # Revisar diagonal superior izquierda
+    i, j = fila - 1, columna - 1
     while i >= 0 and j >= 0:
-        if board[i][j] == 1:
-            conflicts += 1
+        if tablero[i][j] == 1:
+            amenazas += 1
         i -= 1
         j -= 1
 
-    # Verificar la diagonal superior derecha
-    i, j = row - 1, col + 1
-    while i >= 0 and j < n:
-        if board[i][j] == 1:
-            conflicts += 1
+    # Revisar diagonal superior derecha
+    i, j = fila - 1, columna + 1
+    while i >= 0 and j < tamano:
+        if tablero[i][j] == 1:
+            amenazas += 1
         i -= 1
         j += 1
 
-    return conflicts
+    # Revisar diagonal inferior izquierda
+    i, j = fila + 1, columna - 1
+    while i < tamano and j >= 0:
+        if tablero[i][j] == 1:
+            amenazas += 1
+        i += 1
+        j -= 1
 
-def min_conflicts(board, n, max_steps=1000):
-    # Inicializar el tablero con una configuración aleatoria
-    for i in range(n):
-        board[i][random.randint(0, n - 1)] = 1
+    # Revisar diagonal inferior derecha
+    i, j = fila + 1, columna + 1
+    while i < tamano and j < tamano:
+        if tablero[i][j] == 1:
+            amenazas += 1
+        i += 1
+        j += 1
 
-    for _ in range(max_steps):
-        # Seleccionar una reina con conflictos
-        conflict_queens = [(r, c) for r in range(n) for c in range(n) if board[r][c] == 1 and count_conflicts(board, r, c, n) > 0]
-        if not conflict_queens:
-            return board
+    return amenazas
 
-        row, col = random.choice(conflict_queens)
-        board[row][col] = 0
+def resolver_minimos_conflictos(tablero, tamano, max_iteraciones=1000):
+    # Inicializar el tablero con una reina por fila en columnas aleatorias
+    for i in range(tamano):
+        tablero[i][random.randint(0, tamano - 1)] = 1
 
-        # Encontrar la columna con el mínimo conflicto para la reina
-        min_conflict_col = min(range(n), key=lambda c: count_conflicts(board, row, c, n))
-        board[row][min_conflict_col] = 1
+    for _ in range(max_iteraciones):
+        # Identificar reinas en conflicto
+        reinas_en_conflicto = [(r, c) for r in range(tamano) for c in range(tamano) if tablero[r][c] == 1 and contar_amenazas(tablero, r, c, tamano) > 0]
 
-    return board
+        if not reinas_en_conflicto:
+            return tablero
 
-def n_queens_min_conflicts(n):
-    board = [[0 for _ in range(n)] for _ in range(n)]
-    solution = min_conflicts(board, n)
-    return solution
+        fila, columna_actual = random.choice(reinas_en_conflicto)
+        tablero[fila][columna_actual] = 0
 
-# Ejemplo de uso
-n = 4
-solution = n_queens_min_conflicts(n)
+        # Encontrar la columna con la menor cantidad de amenazas para esta fila
+        mejor_columna = min(range(tamano), key=lambda c: contar_amenazas(tablero, fila, c, tamano))
+        tablero[fila][mejor_columna] = 1
 
-if solution:
-    print(f"Solución para {n}-reinas con mínimos conflictos:")
-    for row in solution:
-        print(row)
+    return tablero
+
+def n_reinas_min_conflictos_local(n):
+    tablero = [[0 for _ in range(n)] for _ in range(n)]
+    solucion = resolver_min
