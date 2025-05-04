@@ -1,41 +1,44 @@
 import heapq
+from collections import namedtuple
 
-def heuristic(node, goal):
-    # Ejemplo de heurística:
-    return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
+# Representation of a node with its estimate and the path
+NodeInfo = namedtuple('NodeInfo', ['estimation', 'state', 'route'])
 
-def greedy_best_first_search(graph, start, goal):
-    # Cola de prioridad para mantener los nodos a explorar
-    priority_queue = []
-    heapq.heappush(priority_queue, (heuristic(start, goal), start, [start]))
+def calculate_heuristic(current, target):
+    # Manhattan distance heuristic
+    return abs(current[0] - target[0]) + abs(current[1] - target[1])
 
-    # Conjunto para mantener el registro de los nodos visitados
-    visited = set()
+def greedy_best_first_search(graph_structure, start_node, goal_node):
+    # Priority queue for nodes to explore, prioritized by heuristic
+    open_set = [NodeInfo(calculate_heuristic(start_node, goal_node), start_node, [start_node])]
+    # Set of already examined states
+    explored_nodes = set()
 
-    while priority_queue:
-        # Sacamos el nodo con la menor heurística
-        (_, node, path) = heapq.heappop(priority_queue)
+    while open_set:
+        # Get the node with the lowest heuristic estimate
+        current_node_info = heapq.heappop(open_set)
+        _, current_state, current_route = current_node_info
 
-        # Si alcanzamos el nodo objetivo, devolvemos el camino
-        if node == goal:
-            return path
+        # If the goal is reached, return the path
+        if current_state == goal_node:
+            return current_route
 
-        # Si el nodo no ha sido visitado
-        if node not in visited:
-            visited.add(node)
+        # If the current state has not been explored
+        if current_state not in explored_nodes:
+            explored_nodes.add(current_state)
 
-            # Exploramos los vecinos del nodo actual
-            for neighbor, _ in graph[node]:
-                if neighbor not in visited:
-                    new_path = path + [neighbor]
-                    priority = heuristic(neighbor, goal)
-                    heapq.heappush(priority_queue, (priority, neighbor, new_path))
+            # Examine the successors of the current state
+            for successor, _ in graph_structure.get(current_state, []):
+                if successor not in explored_nodes:
+                    new_route = current_route + [successor]
+                    priority = calculate_heuristic(successor, goal_node)
+                    heapq.heappush(open_set, NodeInfo(priority, successor, new_route))
 
-    # Si no encontramos el nodo objetivo, devolvemos None
+    # If the open set becomes empty without finding the goal
     return None
 
-# Ejemplo de grafo representado como un diccionario de listas de tuplas (nodo, costo)
-graph = {
+# Example graph as a dictionary of lists of tuples (neighbor, cost)
+node_network = {
     (0, 0): [((1, 0), 1), ((0, 1), 1)],
     (1, 0): [((0, 0), 1), ((1, 1), 1)],
     (0, 1): [((0, 0), 1), ((1, 1), 1)],
@@ -43,6 +46,6 @@ graph = {
     (1, 2): [((1, 1), 1)]
 }
 
-# Ejecutamos la búsqueda voraz desde el nodo (0, 0) hasta el nodo (1, 2)
-path = greedy_best_first_search(graph, (0, 0), (1, 2))
-print(f"Camino desde (0, 0) hasta (1, 2) usando Búsqueda Voraz: {path}")
+# Execute Greedy Best-First Search from node (0, 0) to node (1, 2)
+path = greedy_best_first_search(node_network, (0, 0), (1, 2))
+print(f"Path from (0, 0) to (1, 2) using Greedy Best-First Search: {path}")
