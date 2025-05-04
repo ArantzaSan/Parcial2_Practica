@@ -1,47 +1,47 @@
 import random
 
-# Base de datos de canciones con características
-songs_database = [
-    {"title": "Canción Relajante", "mood": "relajante", "genre": "clásica", "popularity": 8},
-    {"title": "Canción Energética", "mood": "energético", "genre": "rock", "popularity": 9},
-    {"title": "Canción Feliz", "mood": "feliz", "genre": "pop", "popularity": 7},
-    {"title": "Canción Triste", "mood": "triste", "genre": "balada", "popularity": 6},
-    {"title": "Canción Nocturna", "mood": "relajante", "genre": "jazz", "popularity": 5},
+# Catálogo musical con atributos clave
+catalogo_musical = [
+    {"titulo": "Melodía Serena", "animo": "tranquilo", "estilo": "instrumental", "fama": 0.8},
+    {"titulo": "Ritmo Vibrante", "animo": "animado", "estilo": "electronica", "fama": 0.9},
+    {"titulo": "Tonada Alegre", "animo": "contento", "estilo": "indie", "fama": 0.7},
+    {"titulo": "Canto Nostálgico", "animo": "melancolico", "estilo": "folk", "fama": 0.6},
+    {"titulo": "Sonido Ambiental", "animo": "tranquilo", "estilo": "ambiental", "fama": 0.5},
 ]
 
-def heuristic(song, user_preferences, context):
-    # Heurística basada en las preferencias del usuario y el contexto actual
-    score = 0
-    if song["mood"] == user_preferences["mood"]:
-        score += 2
-    if song["genre"] == user_preferences["genre"]:
-        score += 2
-    if context["time_of_day"] == "noche" and song["mood"] == "relajante":
-        score += 1
-    if context["time_of_day"] == "día" and song["mood"] == "energético":
-        score += 1
-    score += song["popularity"] / 10
-    return score
+def calcular_preferencia(cancion, gustos_usuario, situacion_actual):
+    # Función de preferencia basada en los gustos del usuario y el contexto
+    puntuacion = 0
+    if cancion["animo"] == gustos_usuario["animo"]:
+        puntuacion += 3
+    if cancion["estilo"] == gustos_usuario["estilo"]:
+        puntuacion += 3
+    if situacion_actual["momento_dia"] == "noche" and cancion["animo"] == "tranquilo":
+        puntuacion += 2
+    if situacion_actual["momento_dia"] == "dia" and cancion["animo"] == "animado":
+        puntuacion += 2
+    puntuacion += cancion["fama"]
+    return puntuacion
 
-def online_music_recommendation(user_preferences, context):
-    # Evaluar todas las canciones en la base de datos
-    scored_songs = [(song, heuristic(song, user_preferences, context)) for song in songs_database]
+def sistema_recomendacion_musical(gustos_usuario, situacion_actual):
+    # Evaluar cada canción del catálogo
+    canciones_valoradas = [(cancion, calcular_preferencia(cancion, gustos_usuario, situacion_actual)) for cancion in catalogo_musical]
 
-    # Seleccionar la canción con la puntuación más alta
-    best_song = max(scored_songs, key=lambda x: x[1])
-    return best_song[0]
+    # Seleccionar la canción con la mayor valoración
+    mejor_opcion = max(canciones_valoradas, key=lambda item: item[1])
+    return mejor_opcion[0]
 
-# Preferencias del usuario
-user_preferences = {
-    "mood": "relajante",
-    "genre": "clásica"
+# Ajustes del usuario
+preferencias_usuario = {
+    "animo": "tranquilo",
+    "estilo": "instrumental"
 }
 
-# Contexto actual (puede cambiar en tiempo real)
-context = {
-    "time_of_day": "noche"
+# Escenario actual
+contexto_actual = {
+    "momento_dia": "noche"
 }
 
-# Obtener recomendación de música
-recommended_song = online_music_recommendation(user_preferences, context)
-print(f"Canción recomendada: {recommended_song['title']} (Género: {recommended_song['genre']}, Estado de ánimo: {recommended_song['mood']})")
+# Obtener la recomendación musical
+cancion_sugerida = sistema_recomendacion_musical(preferencias_usuario, contexto_actual)
+print(f"Sugerencia musical: {cancion_sugerida['titulo']} (Estilo: {cancion_sugerida['estilo']}, Ánimo: {cancion_sugerida['animo']})")
