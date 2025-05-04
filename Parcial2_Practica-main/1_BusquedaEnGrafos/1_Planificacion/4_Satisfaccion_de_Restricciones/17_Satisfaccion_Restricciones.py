@@ -1,57 +1,60 @@
 from collections import defaultdict
 
-# Se define la clase grafo con vertices
-class Graph:
-    def __init__(self, vertices):
-        self.vertices = vertices
-        self.graph = defaultdict(list)
+# Clase para representar un grafo con nodos
+class NodoGrafo:
+    def __init__(self, num_nodos):
+        self.num_nodos = num_nodos
+        self.conexiones = defaultdict(list)
 
-    def add_edge(self, u, v):
-        self.graph[u].append(v)
-        self.graph[v].append(u)
+    def agregar_conexion(self, nodo1, nodo2):
+        self.conexiones[nodo1].append(nodo2)
+        self.conexiones[nodo2].append(nodo1)
 
-# detecta restriccion segura
-def is_safe(graph, vertex, color, colors):
-    for neighbor in graph.graph[vertex]:
-        if colors[neighbor] == color:
+# Verifica si asignar un color a un nodo es válido
+def es_valido(grafo, nodo, color_asignado, asignaciones_color):
+    for vecino in grafo.conexiones[nodo]:
+        if asignaciones_color[vecino] == color_asignado:
             return False
     return True
 
-# Coloreo del grafo
-def graph_coloring(graph, m, vertex=0):
-    if vertex == graph.vertices:
+# Función recursiva para colorear el grafo
+def colorear_recursivo(grafo, num_colores, nodo_actual=0, asignaciones_color=None):
+    if asignaciones_color is None:
+        asignaciones_color = [0] * grafo.num_nodos
+
+    if nodo_actual == grafo.num_nodos:
         return True
 
-    for color in range(1, m + 1):
-        if is_safe(graph, vertex, color, colors):
-            colors[vertex] = color
-            if graph_coloring(graph, m, vertex + 1):
+    for color in range(1, num_colores + 1):
+        if es_valido(grafo, nodo_actual, color, asignaciones_color):
+            asignaciones_color[nodo_actual] = color
+            if colorear_recursivo(grafo, num_colores, nodo_actual + 1, asignaciones_color):
                 return True
-            colors[vertex] = 0
+            asignaciones_color[nodo_actual] = 0  # Backtrack
 
     return False
 
-def solve_csp(graph, m):
-    colors = [0] * graph.vertices
-    if graph_coloring(graph, m):
-        return colors
+def resolver_problema_coloreo(grafo, num_colores):
+    asignaciones_finales = [0] * grafo.num_nodos
+    if colorear_recursivo(grafo, num_colores, asignaciones_color=asignaciones_finales):
+        return asignaciones_finales
     else:
         return None
 
 # Ejemplo de grafo
-g = Graph(4)
-g.add_edge(0, 1)
-g.add_edge(0, 2)
-g.add_edge(1, 2)
-g.add_edge(1, 3)
+mi_grafo = NodoGrafo(4)
+mi_grafo.agregar_conexion(0, 1)
+mi_grafo.agregar_conexion(0, 2)
+mi_grafo.agregar_conexion(1, 2)
+mi_grafo.agregar_conexion(1, 3)
 
 # Número de colores disponibles
-m = 3
+num_colores = 3
 
 # Resolver el problema de coloreado de grafos
-solution = solve_csp(g, m)
+solucion_encontrada = resolver_problema_coloreo(mi_grafo, num_colores)
 
-if solution:
-    print(f"Solución encontrada: {solution}")
+if solucion_encontrada:
+    print(f"Solución encontrada: {solucion_encontrada}")
 else:
     print("No se encontró solución.")
