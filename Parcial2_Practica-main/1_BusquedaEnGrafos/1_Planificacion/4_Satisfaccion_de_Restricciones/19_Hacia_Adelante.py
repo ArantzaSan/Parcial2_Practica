@@ -1,57 +1,61 @@
-def is_safe(board, row, col, n):
-    # Verificar la columna
-    for i in range(row):
-        if board[i][col] == 1:
+def es_segura_reina(tablero, fila, columna, tamano):
+    # Verificar columna
+    for i in range(fila):
+        if tablero[i][columna] == 1:
             return False
 
-    # Verificar la diagonal superior izquierda
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
+    # Verificar diagonal superior izquierda
+    for i, j in zip(range(fila, -1, -1), range(columna, -1, -1)):
+        if tablero[i][j] == 1:
             return False
 
-    # Verificar la diagonal superior derecha
-    for i, j in zip(range(row, -1, -1), range(col, n)):
-        if board[i][j] == 1:
+    # Verificar diagonal superior derecha
+    for i, j in zip(range(fila, -1, -1), range(columna, tamano)):
+        if tablero[i][j] == 1:
             return False
 
     return True
 
-def forward_checking(board, row, n, domains):
-    if row >= n:
+def propagacion_restricciones(tablero, fila_actual, tamano, dominios):
+    if fila_actual >= tamano:
         return True
 
-    for col in domains[row]:
-        if is_safe(board, row, col, n):
-            board[row][col] = 1
-            next_domains = domains.copy()
-            for i in range(row + 1, n):
-                if col in next_domains[i]:
-                    next_domains[i].remove(col)
-                if (row - i >= 0 and col - (row - i) in next_domains[i]):
-                    next_domains[i].remove(col - (row - i))
-                if (row - i >= 0 and col + (row - i) < n and col + (row - i) in next_domains[i]):
-                    next_domains[i].remove(col + (row - i))
+    for columna in list(dominios[fila_actual]):
+        if es_segura_reina(tablero, fila_actual, columna, tamano):
+            tablero[fila_actual][columna] = 1
+            nuevos_dominios = [set(d) for d in dominios]
 
-            if all(next_domains[i] for i in range(row + 1, n)):
-                if forward_checking(board, row + 1, n, next_domains):
+            # Propagar restricciones a las filas siguientes
+            for i in range(fila_actual + 1, tamano):
+                if columna in nuevos_dominios[i]:
+                    nuevos_dominios[i].discard(columna)
+                diag_izq = columna - (i - fila_actual)
+                if 0 <= diag_izq < tamano and diag_izq in nuevos_dominios[i]:
+                    nuevos_dominios[i].discard(diag_izq)
+                diag_der = columna + (i - fila_actual)
+                if 0 <= diag_der < tamano and diag_der in nuevos_dominios[i]:
+                    nuevos_dominios[i].discard(diag_der)
+
+            if all(nuevos_dominios[i] for i in range(fila_actual + 1, tamano)):
+                if propagacion_restricciones(tablero, fila_actual + 1, tamano, nuevos_dominios):
                     return True
-            board[row][col] = 0
+            tablero[fila_actual][columna] = 0
 
     return False
 
-def n_queens_forward_checking(n):
-    board = [[0 for _ in range(n)] for _ in range(n)]
-    domains = [list(range(n)) for _ in range(n)]
-    if not forward_checking(board, 0, n, domains):
+def n_reinas_con_propagacion(n):
+    tablero = [[0 for _ in range(n)] for _ in range(n)]
+    dominios = [set(range(n)) for _ in range(n)]
+    if not propagacion_restricciones(tablero, 0, n, dominios):
         print("No existe solución.")
         return None
-    return board
+    return tablero
 
 # Ejemplo de uso
-n = 4
-solution = n_queens_forward_checking(n)
+num_reinas = 4
+solucion = n_reinas_con_propagacion(num_reinas)
 
-if solution:
-    print(f"Solución para {n}-reinas con forward checking:")
-    for row in solution:
-        print(row)
+if solucion:
+    print(f"Solución para {num_reinas}-reinas con propagación de restricciones:")
+    for fila in solucion:
+        print(fila)
