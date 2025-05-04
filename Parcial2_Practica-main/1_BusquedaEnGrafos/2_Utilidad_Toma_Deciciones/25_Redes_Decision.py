@@ -1,42 +1,42 @@
-class DecisionNode:
-    def __init__(self, question, yes_branch, no_branch):
-        self.question = question
-        self.yes_branch = yes_branch
-        self.no_branch = no_branch
+class NodoDecision:
+    def __init__(self, pregunta, rama_si, rama_no):
+        self.pregunta = pregunta
+        self.rama_si = rama_si
+        self.rama_no = rama_no
 
-    def decide(self):
-        answer = input(self.question + " (si/no): ").strip().lower()
-        if answer == 'si':
-            return self.yes_branch.decide()
-        elif answer == 'no':
-            return self.no_branch.decide()
+    def decidir(self):
+        respuesta = input(self.pregunta + " (sí/no): ").strip().lower()
+        if respuesta == 'sí':
+            return self.rama_si.decidir()
+        elif respuesta == 'no':
+            return self.rama_no.decidir()
         else:
-            print("Respuesta no válida. Por favor, responde con 'si' o 'no'.")
-            return self.decide()
+            print("Respuesta inválida. Por favor, responde con 'sí' o 'no'.")
+            return self.decidir()
 
-class ActionNode:
-    def __init__(self, recommendation):
-        self.recommendation = recommendation
+class NodoAccion:
+    def __init__(self, recomendacion):
+        self.recomendacion = recomendacion
 
-    def decide(self):
-        print(self.recommendation)
-        return self.recommendation
+    def decidir(self):
+        print(self.recomendacion)
+        return self.recomendacion
 
 # Crear nodos de decisión
-root = DecisionNode(
-    "¿Necesitas una fruta alta en vitamina C?",
-    yes_branch=DecisionNode(
-        "¿Prefieres algo dulce?",
-        yes_branch=ActionNode("Deberías comer una naranja."),
-        no_branch=ActionNode("Deberías comer un kiwi.")
+raiz = NodoDecision(
+    "¿Necesitas una fruta rica en vitamina C?",
+    rama_si=NodoDecision(
+        "¿Te apetece algo dulce?",
+        rama_si=NodoAccion("Te recomiendo comer una naranja."),
+        rama_no=NodoAccion("Te sugiero comer un kiwi.")
     ),
-    no_branch=DecisionNode(
-        "¿Estás buscando una fruta baja en calorías?",
-        yes_branch=ActionNode("Deberías comer una manzana."),
-        no_branch=ActionNode("Deberías comer un plátano.")
+    rama_no=NodoDecision(
+        "¿Buscas una fruta con pocas calorías?",
+        rama_si=NodoAccion("Entonces, una manzana sería ideal."),
+        rama_no=NodoAccion("Quizás un plátano sea lo que buscas.")
     )
 )
 
 # Ejecutar la red de decisión
-print("Bienvenido al asistente de selección de frutas.")
-root.decide()
+print("Bienvenido al sistema de recomendación de frutas.")
+raiz.decidir()
