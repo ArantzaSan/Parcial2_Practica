@@ -1,33 +1,44 @@
-def dfs_limited(graph, node, goal, depth_limit, path):
-    # Si alcanzamos el nodo objetivo, devolvemos el camino
-    if node == goal:
-        return path
+def buscar_profundidad_iterativa(grafo_conexo, inicio_nodo, nodo_final):
+    """
+    Implementa la búsqueda en profundidad iterativa (IDDFS) para encontrar un
+    camino desde un nodo inicial hasta un nodo final en un grafo.
 
-    # Si hemos alcanzado el límite de profundidad, devolvemos None
-    if depth_limit <= 0:
+    Args:
+        grafo_conexo (dict): Un diccionario que representa el grafo.
+                                Las claves son los nodos y los valores son listas de vecinos.
+        inicio_nodo: El nodo desde donde comienza la búsqueda.
+        nodo_final: El nodo objetivo que se desea encontrar.
+
+    Returns:
+        list or None: Una lista que representa el camino encontrado desde el
+                     nodo de inicio hasta el nodo final. Retorna None si no
+                     se encuentra ningún camino.
+    """
+
+    def _dfs_con_limite(grafo, nodo_actual, objetivo, profundidad_restante, historial_ruta):
+        """Función auxiliar para realizar la búsqueda en profundidad limitada."""
+        if nodo_actual == objetivo:
+            return historial_ruta
+
+        if profundidad_restante <= 0:
+            return None
+
+        for vecino in grafo.get(nodo_actual, []):
+            if vecino not in historial_ruta:
+                resultado = _dfs_con_limite(grafo, vecino, objetivo, profundidad_restante - 1, historial_ruta + [vecino])
+                if resultado:
+                    return resultado
         return None
 
-    # Exploramos los vecinos del nodo actual
-    for neighbor in graph[node]:
-        if neighbor not in path:  # Evitamos ciclos
-            new_path = dfs_limited(graph, neighbor, goal, depth_limit - 1, path + [neighbor])
-            if new_path:
-                return new_path
-
-    return None
-
-def iddfs(graph, start, goal):
-    depth_limit = 0
+    profundidad = 0
     while True:
-        # Realizamos una búsqueda en profundidad limitada con el límite de profundidad actual
-        path = dfs_limited(graph, start, goal, depth_limit, [start])
-        if path:
-            return path
-        # Incrementamos el límite de profundidad
-        depth_limit += 1
+        camino = _dfs_con_limite(grafo_conexo, inicio_nodo, nodo_final, profundidad, [inicio_nodo])
+        if camino:
+            return camino
+        profundidad += 1
 
-# Ejemplo de grafo representado como un diccionario de listas
-graph = {
+# Ejemplo de la estructura del grafo
+mi_grafo_ejemplo = {
     'A': ['B', 'C'],
     'B': ['A', 'D', 'E'],
     'C': ['A', 'F'],
@@ -36,6 +47,6 @@ graph = {
     'F': ['C', 'E']
 }
 
-# Ejecutamos la búsqueda en profundidad iterativa desde el nodo 'A' hasta el nodo 'F'
-path = iddfs(graph, 'A', 'F')
-print(f"Camino desde 'A' hasta 'F' con profundidad iterativa: {path}")
+# Ejecutar la búsqueda en profundidad iterativa desde 'A' hasta 'F'
+ruta_hallada = buscar_profundidad_iterativa(mi_grafo_ejemplo, 'A', 'F')
+print(f"Ruta encontrada usando IDDFS (A a F): {ruta_hallada}")
