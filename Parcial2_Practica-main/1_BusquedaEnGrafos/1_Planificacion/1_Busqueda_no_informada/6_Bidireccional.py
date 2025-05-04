@@ -1,49 +1,44 @@
 from collections import deque
 
-# busqueda bidireccional
 def bidirectional_search(graph, start, goal):
     if start == goal:
         return [start]
 
-    # Inicializamos las colas para ambas búsquedas
-    forward_queue = deque([(start, [start])])
-    backward_queue = deque([(goal, [goal])])
+    # Inicializar frentes de búsqueda y conjuntos visitados
+    frontera_adelante = deque([(start, [start])])
+    frontera_atras = deque([(goal, [goal])])
+    visitados_adelante = {start: [start]}
+    visitados_atras = {goal: [goal]}
 
-    # Conjuntos para mantener el registro de los nodos visitados en ambas direcciones
-    forward_visited = {start: [start]}
-    backward_visited = {goal: [goal]}
+    while frontera_adelante and frontera_atras:
+        # Expande la búsqueda desde el inicio
+        camino_adelante = expandir_frontera(graph, frontera_adelante, visitados_adelante, visitados_atras)
+        if camino_adelante:
+            return camino_adelante
 
-    while forward_queue and backward_queue:
-        # Expandimos un nivel en la búsqueda hacia adelante
-        forward_path = expand_level(graph, forward_queue, forward_visited, backward_visited)
-        if forward_path:
-            return forward_path
-
-        # Expandimos un nivel en la búsqueda hacia atrás
-        backward_path = expand_level(graph, backward_queue, backward_visited, forward_visited)
-        if backward_path:
-            return backward_path[::-1]  # Invertimos el camino para que vaya de start a goal
+        # Expande la búsqueda desde el objetivo
+        camino_atras = expandir_frontera(graph, frontera_atras, visitados_atras, visitados_adelante)
+        if camino_atras:
+            return camino_atras[::-1]
 
     return None
 
-# iteracion para buscar vecinos
-def expand_level(graph, queue, visited, other_visited):
-    for _ in range(len(queue)):
-        node, path = queue.popleft()
+def expandir_frontera(graph, cola, visitados, otros_visitados):
+    for _ in range(len(cola)):
+        nodo_actual, ruta_actual = cola.popleft()
 
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                new_path = path + [neighbor]
-                visited[neighbor] = new_path
-                queue.append((neighbor, new_path))
+        for vecino in graph[nodo_actual]:
+            if vecino not in visitados:
+                nueva_ruta = ruta_actual + [vecino]
+                visitados[vecino] = nueva_ruta
+                cola.append((vecino, nueva_ruta))
 
-                # Verificamos si encontramos una intersección con la otra búsqueda
-                if neighbor in other_visited:
-                    return path + other_visited[neighbor][::-1]
-
+                # Verifica si hay intersección con la otra búsqueda
+                if vecino in otros_visitados:
+                    return ruta_actual + otros_visitados[vecino][::-1]
     return None
 
-# Ejemplo de grafo representado como un diccionario de listas
+# Ejemplo de grafo
 graph = {
     'A': ['B', 'C'],
     'B': ['A', 'D', 'E'],
@@ -53,6 +48,6 @@ graph = {
     'F': ['C', 'E']
 }
 
-# Ejecutamos la búsqueda bidireccional desde el nodo 'A' hasta el nodo 'F'
+# Ejecutar la búsqueda bidireccional
 path = bidirectional_search(graph, 'A', 'F')
-print(f"Camino desde 'A' hasta 'F' con búsqueda bidireccional: {path}")
+print(f"Camino encontrado con búsqueda bidireccional: {path}")
