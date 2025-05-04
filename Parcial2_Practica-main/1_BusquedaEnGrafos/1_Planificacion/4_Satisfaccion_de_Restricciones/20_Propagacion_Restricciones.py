@@ -1,70 +1,53 @@
 from collections import defaultdict
 
-class CSP:
-    def __init__(self, variables, domains, constraints):
+class ProblemaCSP:
+    def __init__(self, variables, dominios, restricciones):
         self.variables = variables
-        self.domains = domains
-        self.constraints = constraints
-        self.neighbors = self.build_neighbors()
+        self.dominios = dominios
+        self.restricciones = restricciones
+        self.vecinos = self.construir_vecinos()
 
-    def build_neighbors(self):
-        neighbors = defaultdict(set)
-        for (x, y) in self.constraints:
-            neighbors[x].add(y)
-            neighbors[y].add(x)
-        return neighbors
+    def construir_vecinos(self):
+        vecindario = defaultdict(set)
+        for (var1, var2) in self.restricciones:
+            vecindario[var1].add(var2)
+            vecindario[var2].add(var1)
+        return vecindario
 
-    def is_consistent(self, var, value, assignment):
-        for neighbor in self.neighbors[var]:
-            if neighbor in assignment and assignment[neighbor] == value:
+    def es_consistente(self, variable, valor, asignacion):
+        for vecino in self.vecinos[variable]:
+            if vecino in asignacion y asignacion[vecino] == valor:
                 return False
         return True
 
-    def ac3(self):
-        queue = [(x, y) for (x, y) in self.constraints]
-        while queue:
-            (xi, xj) = queue.pop(0)
-            if self.revise(xi, xj):
-                if len(self.domains[xi]) == 0:
+    def aplicar_ac3(self):
+        cola = [(var1, var2) for (var1, var2) in self.restricciones]
+        while cola:
+            (xi, xj) = cola.pop(0)
+            if self.revisar(xi, xj):
+                if not self.dominios[xi]:
                     return False
-                for xk in self.neighbors[xi]:
-                    if xk != xi:
-                        queue.append((xk, xi))
+                for xk in self.vecinos[xi]:
+                    if xk != xj:
+                        cola.append((xk, xi))
         return True
 
-    def revise(self, xi, xj):
-        revised = False
-        to_remove = set()
-        for x in self.domains[xi]:
-            if all(not self.is_consistent(xj, y, {xi: x}) for y in self.domains[xj]):
-                to_remove.add(x)
-                revised = True
-        self.domains[xi] -= to_remove
-        return revised
+    def revisar(self, xi, xj):
+        revisado = False
+        valores_a_eliminar = set()
+        for valor_xi in self.dominios[xi]:
+            if all(not self.es_consistente(xj, valor_xj, {xi: valor_xi}) for valor_xj in self.dominios[xj]):
+                valores_a_eliminar.add(valor_xi)
+                revisado = True
+        self.dominios[xi] -= valores_a_eliminar
+        return revisado
 
-def solve_csp(variables, domains, constraints):
-    csp = CSP(variables, domains, constraints)
-    if csp.ac3():
-        return csp.domains
+def resolver_csp(variables, dominios, restricciones):
+    problema = ProblemaCSP(variables, dominios, restricciones)
+    if problema.aplicar_ac3():
+        return problema.dominios
     else:
         return None
 
-# Ejemplo de problema de asignación de colores
-variables = ['A', 'B', 'C']
-domains = {
-    'A': {'rojo', 'verde', 'azul'},
-    'B': {'rojo', 'verde', 'azul'},
-    'C': {'rojo', 'verde', 'azul'}
-}
-constraints = [
-    ('A', 'B'),
-    ('B', 'C')
-]
-
-# Resolver el problema de asignación de colores
-solution = solve_csp(variables, domains, constraints)
-
-if solution:
-    print(f"Solución encontrada: {solution}")
-else:
-    print("No se encontró solución.")
+# Ejemplo de problema de coloreado de mapas
+variables_mapa = ['TerritorioA', 'TerritorioB', 'TerritorioC']
