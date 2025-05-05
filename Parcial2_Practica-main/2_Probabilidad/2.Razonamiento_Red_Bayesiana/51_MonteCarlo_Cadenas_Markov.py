@@ -1,47 +1,47 @@
 import random
 
-def markov_chain_monte_carlo(weather_states, transition_matrix, initial_state, steps):
+def cadena_de_markov_montecarlo(estados_clima, matriz_transicion, estado_inicial, pasos):
     """
-    Simulate weather probabilities using Markov Chain Monte Carlo.
+    Simula las probabilidades del clima utilizando la Cadena de Markov Montecarlo.
 
-    :param weather_states: List of possible weather states (e.g., ["Sunny", "Rainy", "Cloudy"])
-    :param transition_matrix: Matrix of transition probabilities between states
-    :param initial_state: Initial weather state
-    :param steps: Number of steps to simulate
-    :return: Dictionary with probabilities of each weather state
+    :param estados_clima: Lista de posibles estados del clima (ej., ["Soleado", "Lluvioso", "Nublado"])
+    :param matriz_transicion: Matriz de probabilidades de transición entre estados
+    :param estado_inicial: Estado del clima inicial
+    :param pasos: Número de pasos a simular
+    :return: Diccionario con las probabilidades de cada estado del clima
     """
-    current_state = initial_state
-    state_counts = {state: 0 for state in weather_states}
+    estado_actual = estado_inicial
+    conteo_estados = {estado: 0 for estado in estados_clima}
 
-    for _ in range(steps):
-        state_counts[current_state] += 1
-        next_state = random.choices(
-            weather_states, weights=transition_matrix[weather_states.index(current_state)]
+    for _ in range(pasos):
+        conteo_estados[estado_actual] += 1
+        siguiente_estado = random.choices(
+            estados_clima, weights=matriz_transicion[estados_clima.index(estado_actual)]
         )[0]
-        current_state = next_state
+        estado_actual = siguiente_estado
 
-    total_steps = sum(state_counts.values())
-    probabilities = {state: count / total_steps for state, count in state_counts.items()}
-    return probabilities
+    total_pasos = sum(conteo_estados.values())
+    probabilidades = {estado: conteo / total_pasos for estado, conteo in conteo_estados.items()}
+    return probabilidades
 
 
 if __name__ == "__main__":
-    # Define weather states and transition probabilities
-    weather_states = ["Sunny", "Rainy", "Cloudy"]
-    transition_matrix = [
-        [0.7, 0.2, 0.1],  # Probabilities from "Sunny"
-        [0.3, 0.4, 0.3],  # Probabilities from "Rainy"
-        [0.2, 0.3, 0.5],  # Probabilities from "Cloudy"
+    # Definir los estados del clima y las probabilidades de transición
+    estados_clima = ["Soleado", "Lluvioso", "Nublado"]
+    matriz_transicion = [
+        [0.7, 0.2, 0.1],  # Probabilidades desde "Soleado"
+        [0.3, 0.4, 0.3],  # Probabilidades desde "Lluvioso"
+        [0.2, 0.3, 0.5],  # Probabilidades desde "Nublado"
     ]
 
-    # Initial state and number of steps
-    initial_state = "Sunny"
-    steps = 10000
+    # Estado inicial y número de pasos
+    estado_inicial = "Soleado"
+    pasos = 10000
 
-    # Run the simulation
-    probabilities = markov_chain_monte_carlo(weather_states, transition_matrix, initial_state, steps)
+    # Ejecutar la simulación
+    probabilidades_clima = cadena_de_markov_montecarlo(estados_clima, matriz_transicion, estado_inicial, pasos)
 
-    # Print the results
-    print("Weather probabilities after simulation:")
-    for state, prob in probabilities.items():
-        print(f"{state}: {prob:.4f}")
+    # Imprimir los resultados
+    print("Probabilidades del clima después de la simulación:")
+    for estado, prob in probabilidades_clima.items():
+        print(f"{estado}: {prob:.4f}")
