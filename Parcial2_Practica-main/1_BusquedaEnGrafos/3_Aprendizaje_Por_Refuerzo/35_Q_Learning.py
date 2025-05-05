@@ -3,74 +3,74 @@ import random
 
 # Definir el entorno como una cuadrícula
 # 0: celda normal, -1: obstáculo, 1: recompensa
-environment = np.array([
+mapa_entorno = np.array([
     [0, 0, 0, 1],
     [0, -1, 0, -1],
     [0, 0, 0, 0],
     [0, -1, 0, 0]
 ])
 
-# Parámetros de Q-learning
-learning_rate = 0.1
-discount_factor = 0.9
-exploration_rate = 1.0
-max_exploration_rate = 1.0
-min_exploration_rate = 0.01
-exploration_decay_rate = 0.01
+# Parámetros de Q-aprendizaje
+tasa_aprendizaje = 0.1
+factor_descuento = 0.9
+tasa_exploracion = 1.0
+tasa_exploracion_maxima = 1.0
+tasa_exploracion_minima = 0.01
+tasa_decremento_exploracion = 0.01
 
 # Inicializar la tabla Q con ceros
-rows, cols = environment.shape
-q_table = np.zeros((rows, cols, 4))  # 4 acciones posibles: arriba, abajo, izquierda, derecha
+filas, columnas = mapa_entorno.shape
+tabla_q = np.zeros((filas, columnas, 4))  # 4 acciones posibles: arriba, abajo, izquierda, derecha
 
 # Definir las acciones posibles
-actions = ['up', 'down', 'left', 'right']
+acciones = ['arriba', 'abajo', 'izquierda', 'derecha']
 
 # Función para obtener la siguiente acción
-def get_next_action(state, exploration_rate):
-    if random.uniform(0, 1) < exploration_rate:
-        return random.choice(actions)
+def obtener_siguiente_accion(estado, tasa_exploracion):
+    if random.uniform(0, 1) < tasa_exploracion:
+        return random.choice(acciones)
     else:
-        return actions[np.argmax(q_table[state])]
+        return acciones[np.argmax(tabla_q[estado])]
 
 # Función para obtener el siguiente estado
-def get_next_state(state, action):
-    row, col = state
-    if action == 'up' and row > 0:
-        return (row - 1, col)
-    elif action == 'down' and row < rows - 1:
-        return (row + 1, col)
-    elif action == 'left' and col > 0:
-        return (row, col - 1)
-    elif action == 'right' and col < cols - 1:
-        return (row, col + 1)
-    return state
+def obtener_siguiente_estado(estado, accion):
+    fila, columna = estado
+    if accion == 'arriba' and fila > 0:
+        return (fila - 1, columna)
+    elif accion == 'abajo' and fila < filas - 1:
+        return (fila + 1, columna)
+    elif accion == 'izquierda' and columna > 0:
+        return (fila, columna - 1)
+    elif accion == 'derecha' and columna < columnas - 1:
+        return (fila, columna + 1)
+    return estado
 
 # Entrenamiento del agente
-num_episodes = 1000
-for episode in range(num_episodes):
+numero_episodios = 1000
+for episodio in range(numero_episodios):
     # Reiniciar el entorno y el estado inicial
-    state = (0, 0)
-    done = False
+    estado = (0, 0)
+    terminado = False
 
-    while not done:
-        action = get_next_action(state, exploration_rate)
-        next_state = get_next_state(state, action)
-        reward = environment[next_state]
+    while not terminado:
+        accion = obtener_siguiente_accion(estado, tasa_exploracion)
+        siguiente_estado = obtener_siguiente_estado(estado, accion)
+        recompensa = mapa_entorno[siguiente_estado]
 
         # Actualizar la tabla Q
-        current_q = q_table[state][actions.index(action)]
-        max_future_q = np.max(q_table[next_state])
-        new_q = (1 - learning_rate) * current_q + learning_rate * (reward + discount_factor * max_future_q)
-        q_table[state][actions.index(action)] = new_q
+        q_actual = tabla_q[estado][acciones.index(accion)]
+        max_q_futuro = np.max(tabla_q[siguiente_estado])
+        q_nuevo = (1 - tasa_aprendizaje) * q_actual + tasa_aprendizaje * (recompensa + factor_descuento * max_q_futuro)
+        tabla_q[estado][acciones.index(accion)] = q_nuevo
 
-        state = next_state
+        estado = siguiente_estado
 
-        if reward == 1 or reward == -1:
-            done = True
+        if recompensa == 1 or recompensa == -1:
+            terminado = True
 
     # Reducir la tasa de exploración
-    exploration_rate = min_exploration_rate + (max_exploration_rate - min_exploration_rate) * np.exp(-exploration_decay_rate * episode)
+    tasa_exploracion = tasa_exploracion_minima + (tasa_exploracion_maxima - tasa_exploracion_minima) * np.exp(-tasa_decremento_exploracion * episodio)
 
 # Imprimir la tabla Q final
 print("Tabla Q final:")
-print(q_table)
+print(tabla_q)
