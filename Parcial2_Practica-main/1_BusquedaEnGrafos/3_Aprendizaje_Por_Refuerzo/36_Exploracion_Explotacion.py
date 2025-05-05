@@ -3,73 +3,67 @@ import random
 
 # Definir el entorno como una cuadrícula
 # 0: celda normal, -1: obstáculo, 1: recompensa
-environment = np.array([
+mapa_terreno = np.array([
     [0, 0, 0, 1],
     [0, -1, 0, -1],
     [0, 0, 0, 0],
     [0, -1, 0, 0]
 ])
 
-# Parámetros de Q-learning
-learning_rate = 0.1
-discount_factor = 0.9
-epsilon = 1.0  # Tasa de exploración inicial
-epsilon_min = 0.01  # Tasa de exploración mínima
-epsilon_decay = 0.995  # Tasa de decaimiento de la exploración
+# Parámetros de Q-aprendizaje
+factor_alfa = 0.1  # Tasa de aprendizaje
+factor_gamma = 0.9  # Factor de descuento
+tasa_exploracion_inicial = 1.0  # Epsilon inicial
+tasa_exploracion_minima = 0.01  # Epsilon mínimo
+tasa_decremento_exploracion = 0.995  # Decaimiento de epsilon
 
 # Inicializar la tabla Q con ceros
-rows, cols = environment.shape
-q_table = np.zeros((rows, cols, 4))  # 4 acciones posibles: arriba, abajo, izquierda, derecha
+num_filas, num_columnas = mapa_terreno.shape
+tabla_q_valores = np.zeros((num_filas, num_columnas, 4))  # 4 acciones posibles: arriba, abajo, izquierda, derecha
 
 # Definir las acciones posibles
-actions = ['up', 'down', 'left', 'right']
+posibles_acciones = ['arriba', 'abajo', 'izquierda', 'derecha']
 
 # Función para obtener la siguiente acción usando epsilon-greedy
-def get_next_action(state, epsilon):
-    if random.uniform(0, 1) < epsilon:
-        return random.choice(actions)  # Exploración: elegir una acción aleatoria
+def seleccionar_accion(estado, epsilon_actual):
+    if random.uniform(0, 1) < epsilon_actual:
+        return random.choice(posibles_acciones)  # Exploración: elegir una acción al azar
     else:
-        return actions[np.argmax(q_table[state])]  # Explotación: elegir la mejor acción conocida
+        return posibles_acciones[np.argmax(tabla_q_valores[estado])]  # Explotación: elegir la mejor acción conocida
 
 # Función para obtener el siguiente estado
-def get_next_state(state, action):
-    row, col = state
-    if action == 'up' and row > 0:
-        return (row - 1, col)
-    elif action == 'down' and row < rows - 1:
-        return (row + 1, col)
-    elif action == 'left' and col > 0:
-        return (row, col - 1)
-    elif action == 'right' and col < cols - 1:
-        return (row, col + 1)
-    return state
+def calcular_siguiente_estado(estado_actual, accion):
+    fila_actual, columna_actual = estado_actual
+    if accion == 'arriba' and fila_actual > 0:
+        return (fila_actual - 1, columna_actual)
+    elif accion == 'abajo' and fila_actual < num_filas - 1:
+        return (fila_actual + 1, columna_actual)
+    elif accion == 'izquierda' and columna_actual > 0:
+        return (fila_actual, columna_actual - 1)
+    elif accion == 'derecha' and columna_actual < num_columnas - 1:
+        return (fila_actual, columna_actual + 1)
+    return estado_actual
 
 # Entrenamiento del agente
-num_episodes = 1000
-for episode in range(num_episodes):
+num_intentos = 1000
+epsilon_actual = tasa_exploracion_inicial
+for intento in range(num_intentos):
     # Reiniciar el entorno y el estado inicial
-    state = (0, 0)
-    done = False
+    estado_actual = (0, 0)
+    juego_terminado = False
 
-    while not done:
-        action = get_next_action(state, epsilon)
-        next_state = get_next_state(state, action)
-        reward = environment[next_state]
+    while not juego_terminado:
+        accion_elegida = seleccionar_accion(estado_actual, epsilon_actual)
+        siguiente_estado = calcular_siguiente_estado(estado_actual, accion_elegida)
+        recompensa_obtenida = mapa_terreno[siguiente_estado]
 
         # Actualizar la tabla Q
-        current_q = q_table[state][actions.index(action)]
-        max_future_q = np.max(q_table[next_state])
-        new_q = (1 - learning_rate) * current_q + learning_rate * (reward + discount_factor * max_future_q)
-        q_table[state][actions.index(action)] = new_q
+        q_previo = tabla_q_valores[estado_actual][posibles_acciones.index(accion_elegida)]
+        max_q_siguiente = np.max(tabla_q_valores[siguiente_estado])
+        q_actualizado = (1 - factor_alfa) * q_previo + factor_alfa * (recompensa_obtenida + factor_gamma * max_q_siguiente)
+        tabla_q_valores[estado_actual][posibles_acciones.index(accion_elegida)] = q_actualizado
 
-        state = next_state
+        estado_actual = siguiente_estado
 
-        if reward == 1 or reward == -1:
-            done = True
-
-    # Reducir la tasa de exploración
-    epsilon = max(epsilon_min, epsilon * epsilon_decay)
-
-# Imprimir la tabla Q final
-print("Tabla Q final:")
-print(q_table)
+        if recompensa_obtenida == 1 or recompensa_obtenida == -1:
+            juego_terminado =
