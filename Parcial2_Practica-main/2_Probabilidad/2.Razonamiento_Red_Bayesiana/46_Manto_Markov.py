@@ -1,26 +1,26 @@
 import networkx as nx
 import numpy as np
 
-def create_markov_blanket(graph, node):
+def calcular_manta_markov(grafo, nodo):
     """
-    Function to compute the Markov Blanket of a given node in a Bayesian Network.
-    :param graph: A directed graph (Bayesian Network) using NetworkX.
-    :param node: The node for which the Markov Blanket is computed.
-    :return: A set containing the Markov Blanket of the node.
+    Función para calcular la Manta de Markov de un nodo dado en una Red Bayesiana.
+    :param grafo: Un grafo dirigido (Red Bayesiana) usando NetworkX.
+    :param nodo: El nodo para el cual se calcula la Manta de Markov.
+    :return: Un conjunto que contiene la Manta de Markov del nodo.
     """
-    parents = set(graph.predecessors(node))
-    children = set(graph.successors(node))
-    co_parents = set()
+    padres = set(grafo.predecessors(nodo))
+    hijos = set(grafo.successors(nodo))
+    copadres = set()
 
-    for child in children:
-        co_parents.update(graph.predecessors(child))
+    for hijo in hijos:
+        copadres.update(grafo.predecessors(hijo))
 
-    markov_blanket = parents | children | (co_parents - {node})
-    return markov_blanket
+    manta_markov = padres | hijos | (copadres - {nodo})
+    return manta_markov
 
-# Example Bayesian Network
-bayesian_network = nx.DiGraph()
-bayesian_network.add_edges_from([
+# Ejemplo de Red Bayesiana
+red_bayesiana = nx.DiGraph()
+red_bayesiana.add_edges_from([
     ('A', 'B'),
     ('A', 'C'),
     ('B', 'D'),
@@ -28,8 +28,8 @@ bayesian_network.add_edges_from([
     ('D', 'E')
 ])
 
-# Node for which we want the Markov Blanket
-target_node = 'D'
-markov_blanket = create_markov_blanket(bayesian_network, target_node)
+# Nodo para el cual queremos la Manta de Markov
+nodo_objetivo = 'D'
+manta = calcular_manta_markov(red_bayesiana, nodo_objetivo)
 
-print(f"Markov Blanket of node {target_node}: {markov_blanket}")
+print(f"Manta de Markov del nodo {nodo_objetivo}: {manta}")
