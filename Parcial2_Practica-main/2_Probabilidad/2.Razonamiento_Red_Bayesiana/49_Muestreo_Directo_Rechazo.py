@@ -1,34 +1,37 @@
 import random
 
-def muestreo_directo(probabilidades):
+def muestreo_simple(probs):
     """
-    Realiza un muestreo directo basado en una distribución de probabilidad.
-    :param probabilidades: Lista de probabilidades asociadas a cada evento.
-    :return: Índice del evento seleccionado.
+    Realiza un muestreo directo basado en una distribución de probabilidad discreta.
+    :param probs: Lista de probabilidades correspondientes a cada resultado posible.
+    :return: Índice del resultado seleccionado.
     """
-    acumulada = [sum(probabilidades[:i+1]) for i in range(len(probabilidades))]
-    r = random.uniform(0, 1)
-    for i, prob in enumerate(acumulada):
-        if r <= prob:
-            return i
+    prob_acumulada = 0.0
+    rand_num = random.random()
+    for indice, probabilidad in enumerate(probs):
+        prob_acumulada += probabilidad
+        if rand_num <= prob_acumulada:
+            return indice
+    return len(probs) - 1 # Por si acaso hay errores de redondeo
 
-# Ejemplo: Probabilidades de mezclas químicas
-mezclas = ["Mezcla A", "Mezcla B", "Mezcla C"]
-probabilidades = [0.5, 0.3, 0.2]  # Probabilidades asociadas a cada mezcla
+# Ejemplo: Selección de componentes químicos
+componentes = ["Componente X", "Componente Y", "Componente Z"]
+probabilidades_comp = [0.4, 0.35, 0.25]  # Probabilidades de selección de cada componente
 
-# Validación de que las probabilidades sumen 1
-if not abs(sum(probabilidades) - 1.0) < 1e-6:
-    raise ValueError("Las probabilidades deben sumar 1.")
+# Verificar que las probabilidades sean válidas
+if not abs(sum(probabilidades_comp) - 1.0) < 1e-9:
+    raise ValueError("La suma de las probabilidades debe ser igual a 1.")
 
-# Realizar muestreo directo
-resultados = {mezcla: 0 for mezcla in mezclas}
-n_muestras = 1000
+# Ejecutar el muestreo simple
+resultados_muestreo = {comp: 0 for comp in componentes}
+numero_muestras = 1500
 
-for _ in range(n_muestras):
-    indice = muestreo_directo(probabilidades)
-    resultados[mezclas[indice]] += 1
+for _ in range(numero_muestras):
+    seleccion = muestreo_simple(probabilidades_comp)
+    resultados_muestreo[componentes[seleccion]] += 1
 
-# Mostrar resultados
-print("Resultados del muestreo directo:")
-for mezcla, conteo in resultados.items():
-    print(f"{mezcla}: {conteo} muestras ({(conteo / n_muestras) * 100:.2f}%)")
+# Imprimir los resultados
+print("Resultados del muestreo simple:")
+for componente, frecuencia in resultados_muestreo.items():
+    porcentaje = (frecuencia / numero_muestras) * 100
+    print(f"{componente}: {frecuencia} ocurrencias ({porcentaje:.2f}%)")
