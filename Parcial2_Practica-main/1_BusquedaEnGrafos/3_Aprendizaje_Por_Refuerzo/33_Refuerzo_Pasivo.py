@@ -5,67 +5,67 @@ from stable_baselines3.common.buffers import ReplayBuffer
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 # Crear un entorno de ejemplo (por ejemplo, CartPole)
-env = DummyVecEnv([lambda: gym.make('CartPole-v1')])
+entorno = DummyVecEnv([lambda: gym.make('CartPole-v1')])
 
 # Generar datos de interacciones (esto normalmente se haría fuera de línea)
-def generate_offline_data(env, num_steps=1000):
-    obs = env.reset()
-    actions = []
-    observations = []
-    rewards = []
-    dones = []
-    next_observations = []
+def generar_datos_offline(entorno, num_pasos=1000):
+    observacion = entorno.reset()
+    acciones = []
+    observaciones = []
+    recompensas = []
+    terminados = []
+    siguientes_observaciones = []
 
-    for _ in range(num_steps):
-        action = env.action_space.sample()  # Acción aleatoria
-        next_obs, reward, done, _ = env.step(action)
+    for _ in range(num_pasos):
+        accion = entorno.action_space.sample()  # Acción aleatoria
+        siguiente_obs, recompensa, terminado, _ = entorno.step(accion)
 
-        actions.append(action)
-        observations.append(obs)
-        rewards.append(reward)
-        dones.append(done)
-        next_observations.append(next_obs)
+        acciones.append(accion)
+        observaciones.append(observacion)
+        recompensas.append(recompensa)
+        terminados.append(terminado)
+        siguientes_observaciones.append(siguiente_obs)
 
-        obs = next_obs
-        if done:
-            obs = env.reset()
+        observacion = siguiente_obs
+        if terminado:
+            observacion = entorno.reset()
 
     return {
-        'observations': np.array(observations),
-        'actions': np.array(actions),
-        'rewards': np.array(rewards),
-        'dones': np.array(dones),
-        'next_observations': np.array(next_observations)
+        'observaciones': np.array(observaciones),
+        'acciones': np.array(acciones),
+        'recompensas': np.array(recompensas),
+        'terminados': np.array(terminados),
+        'siguientes_observaciones': np.array(siguientes_observaciones)
     }
 
 # Generar datos de interacciones
-offline_data = generate_offline_data(env)
+datos_offline = generar_datos_offline(entorno)
 
 # Crear un ReplayBuffer con los datos de interacciones
-replay_buffer = ReplayBuffer(
-    buffer_size=len(offline_data['observations']),
-    observation_space=env.observation_space,
-    action_space=env.action_space,
+buffer_experiencia = ReplayBuffer(
+    buffer_size=len(datos_offline['observaciones']),
+    observation_space=entorno.observation_space,
+    action_space=entorno.action_space,
     device='auto'
 )
 
-for i in range(len(offline_data['observations'])):
-    replay_buffer.add(
-        offline_data['observations'][i],
-        offline_data['next_observations'][i],
-        offline_data['actions'][i],
-        offline_data['rewards'][i],
-        offline_data['dones'][i],
+for i in range(len(datos_offline['observaciones'])):
+    buffer_experiencia.add(
+        datos_offline['observaciones'][i],
+        datos_offline['siguientes_observaciones'][i],
+        datos_offline['acciones'][i],
+        datos_offline['recompensas'][i],
+        datos_offline['terminados'][i],
         [0.0]  # Info adicional, no utilizada aquí
     )
 
 # Crear un modelo DQN
-model = DQN('MlpPolicy', env, replay_buffer=replay_buffer, verbose=1)
+modelo = DQN('MlpPolicy', entorno, replay_buffer=buffer_experiencia, verbose=1)
 
 # Entrenar el modelo utilizando los datos de interacciones
-model.learn(total_timesteps=10000)
+modelo.learn(total_timesteps=10000)
 
 # Guardar el modelo entrenado
-model.save("dqn_offline")
+modelo.save("dqn_offline")
 
 print("Modelo entrenado y guardado.")
