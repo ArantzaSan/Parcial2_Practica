@@ -1,38 +1,38 @@
-class MarbleRace:
-    def __init__(self, prior_prob_win, likelihood_win_given_past, likelihood_win_given_not_past):
-        self.prior_prob_win = prior_prob_win  # Probabilidad a priori de que la canica gane
-        self.likelihood_win_given_past = likelihood_win_given_past  # Probabilidad de ganar dado el rendimiento pasado
-        self.likelihood_win_given_not_past = likelihood_win_given_not_past  # Probabilidad de ganar sin rendimiento pasado
+class CarreraCanicas:
+    def __init__(self, probabilidad_previa_victoria, verosimilitud_victoria_dado_pasado, verosimilitud_victoria_sin_pasado):
+        self.probabilidad_previa_victoria = probabilidad_previa_victoria  # Probabilidad a priori de que la canica gane
+        self.verosimilitud_victoria_dado_pasado = verosimilitud_victoria_dado_pasado  # Probabilidad de ganar dado el rendimiento pasado
+        self.verosimilitud_victoria_sin_pasado = verosimilitud_victoria_sin_pasado  # Probabilidad de ganar sin rendimiento pasado
 
-    def update_probability(self, won_last_race):
+    def actualizar_probabilidad(self, gano_ultima_carrera):
         # Aplicar la regla de Bayes para actualizar la probabilidad de ganar
-        if won_last_race:
-            likelihood = self.likelihood_win_given_past
+        if gano_ultima_carrera:
+            verosimilitud = self.verosimilitud_victoria_dado_pasado
         else:
-            likelihood = self.likelihood_win_given_not_past
+            verosimilitud = self.verosimilitud_victoria_sin_pasado
 
         # Calcular la probabilidad posterior
-        posterior_prob_win = (likelihood * self.prior_prob_win) / (
-            (likelihood * self.prior_prob_win) +
-            ((1 - likelihood) * (1 - self.prior_prob_win))
+        probabilidad_posterior_victoria = (verosimilitud * self.probabilidad_previa_victoria) / (
+            (verosimilitud * self.probabilidad_previa_victoria) +
+            ((1 - verosimilitud) * (1 - self.probabilidad_previa_victoria))
         )
 
         # Actualizar la probabilidad a priori para la siguiente iteración
-        self.prior_prob_win = posterior_prob_win
+        self.probabilidad_previa_victoria = probabilidad_posterior_victoria
 
-        return posterior_prob_win
+        return probabilidad_posterior_victoria
 
 # Probabilidades iniciales
-prior_prob_win = 0.5  # Probabilidad a priori de que la canica gane
-likelihood_win_given_past = 0.8  # Probabilidad de ganar dado que ganó la última carrera
-likelihood_win_given_not_past = 0.4  # Probabilidad de ganar dado que no ganó la última carrera
+probabilidad_previa_victoria_inicial = 0.5  # Probabilidad a priori de que la canica gane
+verosimilitud_victoria_con_pasado = 0.8  # Probabilidad de ganar dado que ganó la última carrera
+verosimilitud_victoria_sin_pasado = 0.4  # Probabilidad de ganar dado que no ganó la última carrera
 
 # Crear el modelo de carrera de canicas
-marble_race = MarbleRace(prior_prob_win, likelihood_win_given_past, likelihood_win_given_not_past)
+modelo_carrera = CarreraCanicas(probabilidad_previa_victoria_inicial, verosimilitud_victoria_con_pasado, verosimilitud_victoria_sin_pasado)
 
 # Simular el resultado de la última carrera
-won_last_race = True  # Supongamos que la canica ganó la última carrera
+gano_ultima_carrera_simulada = True  # Supongamos que la canica ganó la última carrera
 
 # Actualizar la probabilidad de ganar
-posterior_prob_win = marble_race.update_probability(won_last_race)
-print(f"Probabilidad actualizada de que la canica gane: {posterior_prob_win:.2f}")
+probabilidad_posterior_victoria_calculada = modelo_carrera.actualizar_probabilidad(gano_ultima_carrera_simulada)
+print(f"Probabilidad actualizada de que la canica gane: {probabilidad_posterior_victoria_calculada:.2f}")
