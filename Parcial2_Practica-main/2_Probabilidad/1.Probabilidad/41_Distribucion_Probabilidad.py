@@ -1,45 +1,45 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class ItemDistribution:
-    def __init__(self, item_probabilities):
-        self.item_probabilities = item_probabilities  # Probabilidades de elección de cada bien
-        self.items = list(item_probabilities.keys())
+class DistribucionArticulos:
+    def __init__(self, probabilidades_articulo):
+        self.probabilidades_articulo = probabilidades_articulo  # Probabilidades de elección de cada bien
+        self.articulos = list(probabilidades_articulo.keys())
 
-    def simulate_choices(self, num_players):
+    def simular_elecciones(self, num_jugadores):
         # Simular las elecciones de los jugadores
-        choices = np.random.choice(self.items, size=num_players, p=list(self.item_probabilities.values()))
-        return choices
+        elecciones = np.random.choice(self.articulos, size=num_jugadores, p=list(self.probabilidades_articulo.values()))
+        return elecciones
 
-    def plot_distribution(self, choices):
+    def graficar_distribucion(self, elecciones):
         # Graficar la distribución de elecciones
-        unique, counts = np.unique(choices, return_counts=True)
-        plt.bar(unique, counts, color='skyblue')
-        plt.xlabel('Bienes')
+        unicos, conteos = np.unique(elecciones, return_counts=True)
+        plt.bar(unicos, conteos, color='lightcoral')
+        plt.xlabel('Artículos')
         plt.ylabel('Número de Jugadores')
-        plt.title('Distribución de Elección de Bienes')
+        plt.title('Distribución de Elección de Artículos')
         plt.show()
 
 # Probabilidades de elección de cada bien
-item_probabilities = {
+probabilidades_articulo = {
     'Espada': 0.5,
     'Arco': 0.3,
     'Escudo': 0.2
 }
 
 # Crear el modelo de distribución de bienes
-item_distribution = ItemDistribution(item_probabilities)
+distribucion_articulos = DistribucionArticulos(probabilidades_articulo)
 
 # Simular las elecciones de 1000 jugadores
-num_players = 1000
-choices = item_distribution.simulate_choices(num_players)
+numero_jugadores = 1000
+elecciones_simuladas = distribucion_articulos.simular_elecciones(numero_jugadores)
 
 # Graficar la distribución de elecciones
-item_distribution.plot_distribution(choices)
+distribucion_articulos.graficar_distribucion(elecciones_simuladas)
 
 # Mostrar la distribución de elecciones
-unique, counts = np.unique(choices, return_counts=True)
-probability_distribution = dict(zip(unique, counts / num_players))
-print("Distribución de probabilidad de elección de bienes:")
-for item, probability in probability_distribution.items():
-    print(f"{item}: {probability:.2f}")
+unicos, conteos = np.unique(elecciones_simuladas, return_counts=True)
+distribucion_probabilidad = dict(zip(unicos, conteos / numero_jugadores))
+print("Distribución de probabilidad de elección de artículos:")
+for articulo, probabilidad in distribucion_probabilidad.items():
+    print(f"{articulo}: {probabilidad:.2f}")
