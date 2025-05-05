@@ -1,55 +1,55 @@
 import numpy as np
 
-class InvestmentUncertainty:
-    def __init__(self, initial_investment, success_prob, failure_prob, success_return, failure_return):
-        self.initial_investment = initial_investment
-        self.success_prob = success_prob
-        self.failure_prob = failure_prob
-        self.success_return = success_return
-        self.failure_return = failure_return
+class IncertidumbreInversion:
+    def __init__(self, inversion_inicial, prob_exito, prob_fracaso, retorno_exito, retorno_fracaso):
+        self.inversion_inicial = inversion_inicial
+        self.prob_exito = prob_exito
+        self.prob_fracaso = prob_fracaso
+        self.retorno_exito = retorno_exito
+        self.retorno_fracaso = retorno_fracaso
 
-    def expected_value(self):
+    def valor_esperado(self):
         # Calcular el valor esperado de la inversión
-        expected_value = (self.success_prob * self.success_return) + (self.failure_prob * self.failure_return)
-        return expected_value - self.initial_investment
+        valor_esperado = (self.prob_exito * self.retorno_exito) + (self.prob_fracaso * self.retorno_fracaso)
+        return valor_esperado - self.inversion_inicial
 
-    def simulate_investment(self, num_simulations=1000):
+    def simular_inversion(self, num_simulaciones=1000):
         # Simular múltiples escenarios de inversión
-        outcomes = []
-        for _ in range(num_simulations):
-            if np.random.rand() < self.success_prob:
-                outcome = self.success_return
+        resultados = []
+        for _ in range(num_simulaciones):
+            if np.random.rand() < self.prob_exito:
+                resultado = self.retorno_exito
             else:
-                outcome = self.failure_return
-            net_outcome = outcome - self.initial_investment
-            outcomes.append(net_outcome)
-        return outcomes
+                resultado = self.retorno_fracaso
+            resultado_neto = resultado - self.inversion_inicial
+            resultados.append(resultado_neto)
+        return resultados
 
-    def investment_risk(self, outcomes):
+    def riesgo_inversion(self, resultados):
         # Evaluar el riesgo de la inversión
-        outcomes = np.array(outcomes)
-        mean_outcome = np.mean(outcomes)
-        std_dev_outcome = np.std(outcomes)
-        return mean_outcome, std_dev_outcome
+        resultados_np = np.array(resultados)
+        promedio_resultado = np.mean(resultados_np)
+        desviacion_estandar_resultado = np.std(resultados_np)
+        return promedio_resultado, desviacion_estandar_resultado
 
 # Parámetros de la inversión
-initial_investment = 1000  # Inversión inicial
-success_prob = 0.6  # Probabilidad de éxito
-failure_prob = 0.4  # Probabilidad de fracaso
-success_return = 2000  # Retorno en caso de éxito
-failure_return = 500   # Retorno en caso de fracaso
+inversion_inicial = 1000  # Inversión inicial
+prob_exito = 0.6  # Probabilidad de éxito
+prob_fracaso = 0.4  # Probabilidad de fracaso
+retorno_exito = 2000  # Retorno en caso de éxito
+retorno_fracaso = 500   # Retorno en caso de fracaso
 
 # Crear el modelo de incertidumbre de inversión
-investment = InvestmentUncertainty(initial_investment, success_prob, failure_prob, success_return, failure_return)
+inversion = IncertidumbreInversion(inversion_inicial, prob_exito, prob_fracaso, retorno_exito, retorno_fracaso)
 
 # Calcular el valor esperado de la inversión
-expected_value = investment.expected_value()
-print(f"Valor esperado de la inversión: ${expected_value:.2f}")
+valor_esperado = inversion.valor_esperado()
+print(f"Valor esperado de la inversión: ${valor_esperado:.2f}")
 
 # Simular múltiples escenarios de inversión
-outcomes = investment.simulate_investment(num_simulations=1000)
+resultados = inversion.simular_inversion(num_simulaciones=1000)
 
 # Evaluar el riesgo de la inversión
-mean_outcome, std_dev_outcome = investment.investment_risk(outcomes)
-print(f"Resultado promedio de la inversión: ${mean_outcome:.2f}")
-print(f"Desviación estándar de la inversión: ${std_dev_outcome:.2f}")
+promedio_resultado, desviacion_estandar_resultado = inversion.riesgo_inversion(resultados)
+print(f"Resultado promedio de la inversión: ${promedio_resultado:.2f}")
+print(f"Desviación estándar de la inversión: ${desviacion_estandar_resultado:.2f}")
