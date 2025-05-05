@@ -4,26 +4,26 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.evaluation import evaluate_policy
 
 # Crear un entorno de ejemplo (por ejemplo, CartPole)
-env = DummyVecEnv([lambda: gym.make('CartPole-v1')])
+entorno = DummyVecEnv([lambda: gym.make('CartPole-v1')])
 
 # Crear un modelo DQN
-model = DQN('MlpPolicy', env, verbose=1)
+modelo = DQN('MlpPolicy', entorno, verbose=1)
 
 # Entrenar el modelo
-model.learn(total_timesteps=10000)
+modelo.learn(total_timesteps=10000)
 
 # Guardar el modelo entrenado
-model.save("dqn_cartpole")
+modelo.save("dqn_cartpole")
 
 # Evaluar el modelo entrenado
-mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=10)
-print(f"Mean reward: {mean_reward} +/- {std_reward}")
+recompensa_media, desviacion_estandar = evaluate_policy(modelo, entorno, n_eval_episodes=10)
+print(f"Recompensa media: {recompensa_media} +/- {desviacion_estandar}")
 
 # Cargar el modelo entrenado y realizar una prueba
-model = DQN.load("dqn_cartpole")
+modelo_cargado = DQN.load("dqn_cartpole")
 
-obs = env.reset()
+observacion = entorno.reset()
 for _ in range(1000):
-    action, _states = model.predict(obs)
-    obs, rewards, dones, info = env.step(action)
-    env.render()
+    accion, _estados = modelo_cargado.predict(observacion)
+    observacion, recompensas, terminados, informacion = entorno.step(accion)
+    entorno.render()
