@@ -1,42 +1,42 @@
-class EconomicPolicyEvaluation:
-    def __init__(self, prior_prob_success, prior_prob_failure):
-        self.prior_prob_success = prior_prob_success  # Probabilidad a priori de éxito
-        self.prior_prob_failure = prior_prob_failure  # Probabilidad a priori de fracaso
+class EvaluacionPoliticaEconomica:
+    def __init__(self, probabilidad_prior_exito, probabilidad_prior_fracaso):
+        self.probabilidad_prior_exito = probabilidad_prior_exito  # Probabilidad a priori de éxito
+        self.probabilidad_prior_fracaso = probabilidad_prior_fracaso  # Probabilidad a priori de fracaso
 
-    def update_belief(self, evidence_success_prob, evidence_failure_prob, observed_success):
+    def actualizar_creencia(self, probabilidad_evidencia_exito, probabilidad_evidencia_fracaso, exito_observado):
         # Actualizar la creencia basada en la evidencia observada
         # Usar el teorema de Bayes para actualizar las probabilidades
-        likelihood_success = evidence_success_prob if observed_success else (1 - evidence_success_prob)
-        likelihood_failure = evidence_failure_prob if observed_success else (1 - evidence_failure_prob)
+        verosimilitud_exito = probabilidad_evidencia_exito if exito_observado else (1 - probabilidad_evidencia_exito)
+        verosimilitud_fracaso = probabilidad_evidencia_fracaso if exito_observado else (1 - probabilidad_evidencia_fracaso)
 
         # Calcular las probabilidades posteriores
-        posterior_prob_success = (likelihood_success * self.prior_prob_success) / (
-            (likelihood_success * self.prior_prob_success) + (likelihood_failure * self.prior_prob_failure)
+        probabilidad_posterior_exito = (verosimilitud_exito * self.probabilidad_prior_exito) / (
+            (verosimilitud_exito * self.probabilidad_prior_exito) + (verosimilitud_fracaso * self.probabilidad_prior_fracaso)
         )
-        posterior_prob_failure = 1 - posterior_prob_success
+        probabilidad_posterior_fracaso = 1 - probabilidad_posterior_exito
 
         # Actualizar las probabilidades a priori para la siguiente iteración
-        self.prior_prob_success = posterior_prob_success
-        self.prior_prob_failure = posterior_prob_failure
+        self.probabilidad_prior_exito = probabilidad_posterior_exito
+        self.probabilidad_prior_fracaso = probabilidad_posterior_fracaso
 
-        return posterior_prob_success, posterior_prob_failure
+        return probabilidad_posterior_exito, probabilidad_posterior_fracaso
 
 # Probabilidades a priori iniciales
-prior_prob_success = 0.5  # Creencia inicial de que la política tendrá éxito
-prior_prob_failure = 0.5  # Creencia inicial de que la política fracasará
+probabilidad_prior_exito_inicial = 0.5  # Creencia inicial de que la política tendrá éxito
+probabilidad_prior_fracaso_inicial = 0.5  # Creencia inicial de que la política fracasará
 
 # Crear el evaluador de políticas económicas
-policy_evaluation = EconomicPolicyEvaluation(prior_prob_success, prior_prob_failure)
+evaluador_politica = EvaluacionPoliticaEconomica(probabilidad_prior_exito_inicial, probabilidad_prior_fracaso_inicial)
 
 # Evidencia observada
-evidence_success_prob = 0.7  # Probabilidad de observar éxito si la política es efectiva
-evidence_failure_prob = 0.3  # Probabilidad de observar éxito si la política no es efectiva
-observed_success = True  # Observación: la política tuvo éxito
+probabilidad_evidencia_exito_observado = 0.7  # Probabilidad de observar éxito si la política es efectiva
+probabilidad_evidencia_fracaso_observado = 0.3  # Probabilidad de observar éxito si la política no es efectiva
+observacion_exito = True  # Observación: la política tuvo éxito
 
 # Actualizar la creencia basada en la evidencia observada
-posterior_prob_success, posterior_prob_failure = policy_evaluation.update_belief(
-    evidence_success_prob, evidence_failure_prob, observed_success
+probabilidad_posterior_exito_calculada, probabilidad_posterior_fracaso_calculada = evaluador_politica.actualizar_creencia(
+    probabilidad_evidencia_exito_observado, probabilidad_evidencia_fracaso_observado, observacion_exito
 )
 
-print(f"Probabilidad posterior de éxito: {posterior_prob_success:.2f}")
-print(f"Probabilidad posterior de fracaso: {posterior_prob_failure:.2f}")
+print(f"Probabilidad posterior de éxito: {probabilidad_posterior_exito_calculada:.2f}")
+print(f"Probabilidad posterior de fracaso: {probabilidad_posterior_fracaso_calculada:.2f}")
