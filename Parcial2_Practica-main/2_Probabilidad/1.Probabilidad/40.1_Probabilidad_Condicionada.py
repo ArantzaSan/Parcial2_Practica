@@ -1,47 +1,47 @@
-class ElectionPrediction:
-    def __init__(self, prior_prob_win, poll_support_prob, voter_turnout_prob):
-        self.prior_prob_win = prior_prob_win  # Probabilidad a priori de que el candidato gane
-        self.poll_support_prob = poll_support_prob  # Probabilidad de apoyo en encuestas
-        self.voter_turnout_prob = voter_turnout_prob  # Probabilidad de participación de votantes
+class PrediccionElecciones:
+    def __init__(self, probabilidad_prior_victoria, probabilidad_apoyo_encuestas, probabilidad_participacion_votantes):
+        self.probabilidad_prior_victoria = probabilidad_prior_victoria  # Probabilidad a priori de que el candidato gane
+        self.probabilidad_apoyo_encuestas = probabilidad_apoyo_encuestas  # Probabilidad de apoyo en encuestas
+        self.probabilidad_participacion_votantes = probabilidad_participacion_votantes  # Probabilidad de participación de votantes
 
-    def conditional_probability(self, poll_support, voter_turnout):
+    def probabilidad_condicional(self, apoyo_encuestas, participacion_votantes):
         # Calcular la probabilidad condicional de ganar dado el apoyo en encuestas y la participación de votantes
-        joint_prob_win = (self.prior_prob_win *
-                          self.poll_support_prob[poll_support] *
-                          self.voter_turnout_prob[voter_turnout])
+        probabilidad_conjunta_victoria = (self.probabilidad_prior_victoria *
+                                          self.probabilidad_apoyo_encuestas[apoyo_encuestas] *
+                                          self.probabilidad_participacion_votantes[participacion_votantes])
 
-        joint_prob_lose = ((1 - self.prior_prob_win) *
-                           (1 - self.poll_support_prob[poll_support]) *
-                           (1 - self.voter_turnout_prob[voter_turnout]))
+        probabilidad_conjunta_derrota = ((1 - self.probabilidad_prior_victoria) *
+                                          (1 - self.probabilidad_apoyo_encuestas[apoyo_encuestas]) *
+                                          (1 - self.probabilidad_participacion_votantes[participacion_votantes]))
 
-        total_prob = joint_prob_win + joint_prob_lose
+        probabilidad_total = probabilidad_conjunta_victoria + probabilidad_conjunta_derrota
 
-        conditional_prob_win = joint_prob_win / total_prob
-        return conditional_prob_win
+        probabilidad_condicional_victoria = probabilidad_conjunta_victoria / probabilidad_total
+        return probabilidad_condicional_victoria
 
 # Probabilidades a priori y condicionales
-prior_prob_win = 0.5  # Probabilidad a priori de que el candidato gane
+probabilidad_prior_victoria_inicial = 0.5  # Probabilidad a priori de que el candidato gane
 
 # Probabilidades de apoyo en encuestas
-poll_support_prob = {
-    'high': 0.7,   # Alta probabilidad de apoyo en encuestas
-    'medium': 0.5, # Probabilidad media de apoyo en encuestas
-    'low': 0.3     # Baja probabilidad de apoyo en encuestas
+probabilidad_apoyo_encuestas_diccionario = {
+    'alto': 0.7,  # Alta probabilidad de apoyo en encuestas
+    'medio': 0.5,  # Probabilidad media de apoyo en encuestas
+    'bajo': 0.3  # Baja probabilidad de apoyo en encuestas
 }
 
 # Probabilidades de participación de votantes
-voter_turnout_prob = {
-    'high': 0.6,   # Alta probabilidad de participación de votantes
-    'medium': 0.4, # Probabilidad media de participación de votantes
-    'low': 0.2     # Baja probabilidad de participación de votantes
+probabilidad_participacion_votantes_diccionario = {
+    'alto': 0.6,  # Alta probabilidad de participación de votantes
+    'medio': 0.4,  # Probabilidad media de participación de votantes
+    'bajo': 0.2  # Baja probabilidad de participación de votantes
 }
 
 # Crear el modelo de predicción de elecciones
-election_prediction = ElectionPrediction(prior_prob_win, poll_support_prob, voter_turnout_prob)
+modelo_prediccion = PrediccionElecciones(probabilidad_prior_victoria_inicial, probabilidad_apoyo_encuestas_diccionario, probabilidad_participacion_votantes_diccionario)
 
 # Calcular la probabilidad condicional de ganar dado el apoyo en encuestas y la participación de votantes
-poll_support = 'high'  # Observación: alto apoyo en encuestas
-voter_turnout = 'medium'  # Observación: participación media de votantes
+apoyo_encuestas_observado = 'alto'  # Observación: alto apoyo en encuestas
+participacion_votantes_observada = 'medio'  # Observación: participación media de votantes
 
-conditional_prob_win = election_prediction.conditional_probability(poll_support, voter_turnout)
-print(f"Probabilidad condicional de que el candidato gane: {conditional_prob_win:.2f}")
+probabilidad_condicional_victoria_calculada = modelo_prediccion.probabilidad_condicional(apoyo_encuestas_observado, participacion_votantes_observada)
+print(f"Probabilidad condicional de que el candidato gane: {probabilidad_condicional_victoria_calculada:.2f}")
