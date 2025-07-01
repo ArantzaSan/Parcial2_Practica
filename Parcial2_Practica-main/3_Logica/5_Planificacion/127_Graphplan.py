@@ -19,7 +19,7 @@ class Action:
     def __repr__(self):
         return f"Action({self.name})"
 
-# Definición del grafo de planificación
+# Definición del grafo de planificación.
 class PlanningGraph:
     def __init__(self, initial_state, actions, goals):
         self.levels = []  # Lista de niveles de estados
